@@ -31,6 +31,17 @@ Source: Kaggle
 - Sub-Category
 - Customer Segment
 
+## ETL Pipeline
+
+The project includes an automated ETL script that:
+
+- Reads the raw Global Superstore dataset
+- Removes duplicate records
+- Handles missing values
+- Converts date columns
+- Creates Year, Month, and Quarter features
+- Saves a cleaned dataset for downstream analysis
+
 ## Project Status
 
 🚧 Under Development
