@@ -45,3 +45,21 @@ The project includes an automated ETL script that:
 ## Project Status
 
 🚧 Under Development
+
+## Frontend
+
+### Changes Made
+- Initialized the Next.js frontend.
+- Created the homepage.
+- Added a navigation bar.
+- Organized the frontend project structure.
+
+### Run the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:3000 in your browser.
