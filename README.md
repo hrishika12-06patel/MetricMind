@@ -42,6 +42,20 @@ The project includes an automated ETL script that:
 - Creates Year, Month, and Quarter features
 - Saves a cleaned dataset for downstream analysis
 
+## Database Design
+
+The project uses a relational database to store the cleaned Global Superstore dataset.
+
+The Orders table stores sales, customer, product, and regional information.
+
+A database schema and ER diagram have been created as the foundation for backend APIs and semantic metrics.
+
+## Team
+-  Hrishika Patel
+-  Patati Yasawi
+-  Apurv Dwivedi
+-  Chinthala Akhilandeshwari
+
 ## Project Status
 
 🚧 Under Development
@@ -63,3 +77,12 @@ npm run dev
 ```
 
 Open http://localhost:3000 in your browser.
+---
+
+## Documentation
+
+### Semantic Metrics
+
+The `docs/semantic_metrics.md` document defines the business metrics, dimensions, formulas, and semantic concepts used by the MetricMind Semantic BI Engine.
+
+This document serves as the foundation for implementing the Semantic Layer using Cube.dev/dbt and ensures that AI-generated business insights are consistent, accurate, and governed across the application.
