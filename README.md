@@ -42,6 +42,20 @@ The project includes an automated ETL script that:
 - Creates Year, Month, and Quarter features
 - Saves a cleaned dataset for downstream analysis
 
+## Database Design
+
+The project uses a relational database to store the cleaned Global Superstore dataset.
+
+The Orders table stores sales, customer, product, and regional information.
+
+A database schema and ER diagram have been created as the foundation for backend APIs and semantic metrics.
+
+## Team
+-  Hrishika Patel
+-  Patati Yasawi
+-  Apurv Dwivedi
+-  Chinthala Akhilandeshwari
+
 ## Project Status
 
 🚧 Under Development
