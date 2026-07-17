@@ -45,3 +45,13 @@ The project includes an automated ETL script that:
 ## Project Status
 
 🚧 Under Development
+
+---
+
+## Documentation
+
+### Semantic Metrics
+
+The `docs/semantic_metrics.md` document defines the business metrics, dimensions, formulas, and semantic concepts used by the MetricMind Semantic BI Engine.
+
+This document serves as the foundation for implementing the Semantic Layer using Cube.dev/dbt and ensures that AI-generated business insights are consistent, accurate, and governed across the application.
