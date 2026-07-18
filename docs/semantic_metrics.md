@@ -211,12 +211,61 @@ Implementing semantic metrics provides several advantages:
 
 ---
 
-# 9. References
+# 9. Revenue Metric — Implemented
 
-1. Axlero Solutions – Advanced Data Analytics Project Handbook (MetricMind Project)
-2. Cube.dev Documentation – Semantic Layer Concepts
-3. dbt Documentation – Semantic Layer
-4. Standard Business Intelligence Metrics and Financial Reporting Practices
+**Implementation File:** `semantic/revenue.yaml`
+
+The first semantic metric implemented for MetricMind is **Revenue**. Revenue was selected as the initial metric because it serves as the foundation for many other business metrics such as Gross Margin, Average Order Value (AOV), Revenue Growth, and other financial KPIs.
+
+Instead of allowing the AI to generate different SQL queries for revenue, the Semantic Layer now provides a single standardized definition that can be reused consistently across dashboards, reports, and AI-generated responses.
+
+## Business Definition
+
+Revenue represents the **Net Revenue** generated from customer orders after deducting discounts and refunds.
+
+### Formula
+
+```
+Net Revenue = Gross Revenue − Discount Amount − Refund Amount
+```
+
+## Source
+
+| Property | Value |
+|----------|-------|
+| Source Table | orders |
+| Aggregation | SUM |
+| Owner | Finance Team |
+| Metric Type | Measure |
+
+## Supported Dimensions
+
+The Revenue metric can be analyzed using the following business dimensions:
+
+- Order Date
+- Region
+- Product Line
+- Customer Segment
+
+Using the same dimensions across all semantic metrics ensures that business users receive consistent analytical results regardless of which metric they query.
+
+## Example Business Questions
+
+The Revenue metric enables the AI assistant to answer questions such as:
+
+- What is our total revenue?
+- Show revenue by region.
+- Compare quarterly revenue.
+- Show revenue by product line.
+- What was last month's revenue?
+
+## Notes
+
+- Net Revenue is treated as the default business definition.
+- Gross Revenue remains available as a separate metric for reporting purposes.
+- Currency conversion should be handled before Revenue is calculated if multiple currencies are present.
+- Future governance testing will verify that repeated queries always return identical results.
+
 
 ---
 
