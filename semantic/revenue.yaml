@@ -1,0 +1,60 @@
+# ==========================================================
+# MetricMind - Revenue Semantic Metric
+# Purpose:
+# Defines the standard business meaning of Revenue so that
+# all dashboards and AI responses use the same calculation.
+# ==========================================================
+
+metric:
+  name: revenue
+  display_name: Revenue
+
+  description: >
+    Revenue represents the total net income generated from customer
+    sales after subtracting discounts and refunds.
+    This is the default revenue metric used across the application.
+
+  type: measure
+
+  owner: Finance Team
+
+  source:
+    table: orders
+
+  formula:
+    expression: gross_revenue - discount_amount - refund_amount
+
+  base_metrics:
+    - gross_revenue
+    - discount_amount
+    - refund_amount
+
+  dimensions:
+    - order_date
+    - region
+    - product_line
+    - customer_segment
+
+  aggregation: sum
+
+  format:
+    type: currency
+    currency: USD
+
+  tags:
+    - finance
+    - revenue
+    - semantic-layer
+    - metricmind
+
+  business_questions:
+    - What is our total revenue?
+    - Show revenue by region.
+    - Show revenue by product line.
+    - Compare revenue by quarter.
+    - What was revenue last month?
+
+  notes:
+    - Uses Net Revenue as the default business definition.
+    - Gross Revenue is maintained separately for reporting purposes.
+    - Currency conversion must be handled before this metric if multiple currencies exist.
