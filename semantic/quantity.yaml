@@ -1,0 +1,29 @@
+metric:
+  name: total_quantity_sold
+
+  display_name: Total Quantity Sold
+
+  description: >
+    Total quantity of products sold.
+
+  type: measure
+
+  owner: Sales Team
+
+  source:
+    table: orders
+
+  formula:
+    expression: quantity
+
+  dimensions:
+    - order_date
+    - region
+    - product_line
+    - customer_segment
+
+  aggregation: sum
+
+  business_questions:
+    - Total units sold.
+    - Quantity sold by product.

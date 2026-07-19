@@ -1,0 +1,38 @@
+metric:
+  name: total_profit
+  display_name: Total Profit
+
+  description: >
+    Total Profit represents the net revenue remaining after
+    subtracting product cost.
+
+  type: measure
+
+  owner: Finance Team
+
+  source:
+    table: orders
+
+  formula:
+    expression: (gross_revenue - discount_amount - refund_amount) - cost_amount
+
+  dimensions:
+    - order_date
+    - region
+    - product_line
+    - customer_segment
+
+  aggregation: sum
+
+  format:
+    type: currency
+    currency: USD
+
+  business_questions:
+    - What is total profit?
+    - Show profit by region.
+    - Compare profit by quarter.
+
+  notes:
+    - Assumes cost_amount exists in the orders table.
+    - If costs move to another table, joins will be required.

@@ -1,0 +1,33 @@
+metric:
+  name: total_orders
+
+  display_name: Total Orders
+
+  description: >
+    Counts the total number of customer orders.
+
+  type: measure
+
+  owner: Operations Team
+
+  source:
+    table: orders
+
+  formula:
+    expression: COUNT(DISTINCT order_id)
+
+  dimensions:
+    - order_date
+    - region
+    - product_line
+    - customer_segment
+
+  aggregation: countDistinct
+
+  business_questions:
+    - Total orders.
+    - Orders by region.
+    - Monthly order count.
+
+  notes:
+    - Uses DISTINCT order_id to avoid duplicate counting.
