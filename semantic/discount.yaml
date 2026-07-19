@@ -1,0 +1,33 @@
+metric:
+  name: average_discount
+
+  display_name: Average Discount
+
+  description: >
+    Average discount applied per customer order.
+
+  type: measure
+
+  owner: Sales Team
+
+  source:
+    table: orders
+
+  formula:
+    expression: AVG(discount_amount)
+
+  dimensions:
+    - order_date
+    - region
+    - product_line
+    - customer_segment
+
+  aggregation: average
+
+  format:
+    type: currency
+    currency: USD
+
+  business_questions:
+    - What is the average discount?
+    - Compare discounts across regions.
