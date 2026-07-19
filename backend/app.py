@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from sqlalchemy import text
 from database import Base, engine, test_connection
 
 app = FastAPI()
@@ -16,3 +17,19 @@ def root():
 @app.get("/db-test")
 def db_test():
     return {"status": "Database connected successfully!"}
+
+@app.get("/orders")
+def get_orders():
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT * FROM Orders LIMIT 10"))
+
+            orders = []
+
+            for row in result:
+                orders.append(dict(row._mapping))
+
+            return orders
+
+    except Exception as e:
+        return {"error": str(e)}    

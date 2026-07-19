@@ -86,3 +86,15 @@ Open http://localhost:3000 in your browser.
 The `docs/semantic_metrics.md` document defines the business metrics, dimensions, formulas, and semantic concepts used by the MetricMind Semantic BI Engine.
 
 This document serves as the foundation for implementing the Semantic Layer using Cube.dev/dbt and ensures that AI-generated business insights are consistent, accurate, and governed across the application.
+
+## Running the Backend
+
+1. Activate the virtual environment.
+2. Navigate to the `backend` folder.
+3. Start the FastAPI server:
+
+```bash
+uvicorn app:app --reload
+```
+
+4. Open `http://127.0.0.1:8000/docs` to access the API documentation.
