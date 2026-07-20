@@ -1,19 +1,10 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
-from database import Base, engine, test_connection
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from database import Base, engine, test_connection, get_db
+from database import get_all_orders, count_total_orders, calculate_total_sales, calculate_total_profit
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Create tables and test connection on startup
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(bind=engine)
@@ -28,17 +19,17 @@ def db_test():
     return {"status": "Database connected successfully!"}
 
 @app.get("/orders")
-def get_orders():
-    try:
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT * FROM Orders LIMIT 10"))
+def get_orders(db: Session = Depends(get_db)):
+    return get_all_orders(db)
 
-            orders = []
+@app.get("/orders/count")
+def orders_count(db: Session = Depends(get_db)):
+    return {"total_orders": count_total_orders(db)}
 
-            for row in result:
-                orders.append(dict(row._mapping))
+@app.get("/orders/total-sales")
+def total_sales(db: Session = Depends(get_db)):
+    return {"total_sales": calculate_total_sales(db)}
 
-            return orders
-
-    except Exception as e:
-        return {"error": str(e)}    
+@app.get("/orders/total-profit")
+def total_profit(db: Session = Depends(get_db)):
+    return {"total_profit": calculate_total_profit(db)}

@@ -1,8 +1,10 @@
+import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite:///../database/metricmind.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, '..', 'database', 'metricmind.db')}"
 
 engine = create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False}
@@ -19,7 +21,6 @@ def get_db():
     finally:
         db.close()
 
-# Test connection
 def test_connection():
     try:
         with engine.connect() as conn:
@@ -27,3 +28,23 @@ def test_connection():
         print("✅ Database connected successfully!")
     except Exception as e:
         print(f"❌ Connection failed: {e}")
+
+def get_all_orders(db):
+    result = db.execute(text("SELECT * FROM orders"))
+    rows = result.fetchall()
+    return [dict(row._mapping) for row in rows]
+
+def count_total_orders(db):
+    result = db.execute(text("SELECT COUNT(*) as total FROM orders"))
+    row = result.fetchone()
+    return row._mapping["total"]
+
+def calculate_total_sales(db):
+    result = db.execute(text("SELECT SUM(sales) as total_sales FROM orders"))
+    row = result.fetchone()
+    return row._mapping["total_sales"] or 0
+
+def calculate_total_profit(db):
+    result = db.execute(text("SELECT SUM(profit) as total_profit FROM orders"))
+    row = result.fetchone()
+    return row._mapping["total_profit"] or 0
