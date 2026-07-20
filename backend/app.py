@@ -1,7 +1,18 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from database import Base, engine, test_connection, get_db
-from database import get_all_orders, count_total_orders, calculate_total_sales, calculate_total_profit
+from database import (
+    Base,
+    engine,
+    test_connection,
+    get_db,
+    get_all_orders,
+    count_total_orders,
+    calculate_total_sales,
+    calculate_total_profit,
+    calculate_average_discount,
+    calculate_average_sales,
+    calculate_total_quantity,
+)
 
 app = FastAPI()
 
@@ -33,3 +44,21 @@ def total_sales(db: Session = Depends(get_db)):
 @app.get("/orders/total-profit")
 def total_profit(db: Session = Depends(get_db)):
     return {"total_profit": calculate_total_profit(db)}
+
+@app.get("/orders/average-discount")
+def average_discount(db: Session = Depends(get_db)):
+    return {
+        "average_discount": calculate_average_discount(db)
+    }
+
+@app.get("/orders/average-sales")
+def average_sales(db: Session = Depends(get_db)):
+    return {
+        "average_sales": calculate_average_sales(db)
+    }
+
+@app.get("/orders/total-quantity")
+def total_quantity(db: Session = Depends(get_db)):
+    return {
+        "total_quantity": calculate_total_quantity(db)
+    }
