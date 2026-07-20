@@ -48,3 +48,30 @@ def calculate_total_profit(db):
     result = db.execute(text("SELECT SUM(profit) as total_profit FROM orders"))
     row = result.fetchone()
     return row._mapping["total_profit"] or 0
+
+def calculate_average_discount(db):
+    result = db.execute(
+        text("SELECT AVG(discount) AS average_discount FROM orders")
+    )
+
+    row = result.fetchone()
+
+    return row._mapping["average_discount"] or 0
+
+def calculate_average_sales(db):
+    result = db.execute(
+        text("SELECT AVG(sales) AS average_sales FROM orders")
+    )
+
+    row = result.fetchone()
+
+    return row._mapping["average_sales"] or 0
+
+def calculate_total_quantity(db):
+    result = db.execute(
+        text("SELECT SUM(quantity) AS total_quantity FROM orders")
+    )
+
+    row = result.fetchone()
+
+    return row._mapping["total_quantity"] or 0

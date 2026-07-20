@@ -98,3 +98,11 @@ uvicorn app:app --reload
 ```
 
 4. Open `http://127.0.0.1:8000/docs` to access the API documentation.
+
+## Features
+
+- FastAPI backend for serving analytics APIs.
+- SQLite database for storing order data.
+- REST APIs to retrieve orders and business metrics.
+- Semantic layer for business metric definitions.
+- Frontend dashboard (under development).
