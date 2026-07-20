@@ -1,0 +1,31 @@
+metric:
+  name: total_sales
+
+  display_name: Total Sales
+
+  description: >
+    Represents the total sales generated before discounts
+    and refunds.
+
+  type: measure
+
+  owner: Sales Team
+
+  source:
+    table: orders
+
+  formula:
+    expression: gross_revenue
+
+  aggregation: sum
+
+  dimensions:
+    - order_date
+    - region
+    - product_line
+    - customer_segment
+
+  business_questions:
+    - Total sales.
+    - Sales by region.
+    - Monthly sales.
