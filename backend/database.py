@@ -49,80 +49,27 @@ def calculate_total_profit(db):
     row = result.fetchone()
     return row._mapping["total_profit"] or 0
 
-def calculate_average_discount(db):
-    result = db.execute(
-        text("SELECT AVG(discount) AS average_discount FROM orders")
-    )
+def create_indexes(engine):
+    with engine.connect() as conn:
+        indexes = [
+            "CREATE INDEX IF NOT EXISTS idx_order_id ON orders (order_id)",
+            "CREATE INDEX IF NOT EXISTS idx_customer_id ON orders (customer_id)",
+            "CREATE INDEX IF NOT EXISTS idx_region ON orders (region)",
+            "CREATE INDEX IF NOT EXISTS idx_category ON orders (category)",
+        ]
+        for idx in indexes:
+            try:
+                conn.execute(text(idx))
+                print(f"✅ Index created: {idx.split('idx_')[1].split(' ')[0]}")
+            except Exception as e:
+                print(f"⚠️ Index skipped: {e}")
+        conn.commit()
+    print("✅ All indexes processed!")
 
-    row = result.fetchone()
+def open_session():
+    db = SessionLocal()
+    return db
 
-    return row._mapping["average_discount"] or 0
-
-def calculate_average_sales(db):
-    result = db.execute(
-        text("SELECT AVG(sales) AS average_sales FROM orders")
-    )
-
-    row = result.fetchone()
-
-    return row._mapping["average_sales"] or 0
-
-def calculate_total_quantity(db):
-    result = db.execute(
-        text("SELECT SUM(quantity) AS total_quantity FROM orders")
-    )
-
-    row = result.fetchone()
-
-    return row._mapping["total_quantity"] or 0
-
-def count_unique_customers(db):
-    result = db.execute(
-        text("SELECT COUNT(DISTINCT customer_id) AS total_customers FROM orders")
-    )
-
-    row = result.fetchone()
-
-    return row._mapping["total_customers"] or 0
-
-def sales_by_region(db):
-    result = db.execute(
-        text("""
-        SELECT region,
-               SUM(sales) AS total_sales
-        FROM orders
-        GROUP BY region
-        """)
-    )
-
-    rows = result.fetchall()
-
-    return [dict(row._mapping) for row in rows]
-
-def sales_by_category(db):
-    result = db.execute(
-        text("""
-        SELECT category,
-               SUM(sales) AS total_sales
-        FROM orders
-        GROUP BY category
-        """)
-    )
-
-    rows = result.fetchall()
-
-    return [dict(row._mapping) for row in rows]
-
-def sales_by_segment(db):
-    result = db.execute(
-        text("""
-        SELECT segment,
-               SUM(sales) AS total_sales
-        FROM orders
-        GROUP BY segment
-        """)
-    )
-
-    rows = result.fetchall()
-
-    return [dict(row._mapping) for row in rows]
+def close_session(db):
+    db.close()
+    print("✅ Session closed.")

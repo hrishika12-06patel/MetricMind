@@ -1,22 +1,10 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from database import (
-    Base,
-    engine,
-    test_connection,
-    get_db,
-    get_all_orders,
-    count_total_orders,
-    calculate_total_sales,
-    calculate_total_profit,
-    calculate_average_discount,
-    calculate_average_sales,
-    calculate_total_quantity,
-    count_unique_customers,
-    sales_by_region,
-    sales_by_category,
-    sales_by_segment
-)
+from database import (Base, engine, test_connection, get_db,
+                      get_all_orders, count_total_orders,
+                      calculate_total_sales, calculate_total_profit,
+                      create_indexes, open_session, close_session)
+from sqlalchemy import text
 
 app = FastAPI()
 
@@ -24,6 +12,7 @@ app = FastAPI()
 def startup():
     Base.metadata.create_all(bind=engine)
     test_connection()
+    create_indexes(engine)
 
 @app.get("/")
 def root():
@@ -49,38 +38,14 @@ def total_sales(db: Session = Depends(get_db)):
 def total_profit(db: Session = Depends(get_db)):
     return {"total_profit": calculate_total_profit(db)}
 
-@app.get("/orders/average-discount")
-def average_discount(db: Session = Depends(get_db)):
-    return {
-        "average_discount": calculate_average_discount(db)
-    }
-
-@app.get("/orders/average-sales")
-def average_sales(db: Session = Depends(get_db)):
-    return {
-        "average_sales": calculate_average_sales(db)
-    }
-
-@app.get("/orders/total-quantity")
-def total_quantity(db: Session = Depends(get_db)):
-    return {
-        "total_quantity": calculate_total_quantity(db)
-    }
-
-@app.get("/customers/count")
-def customer_count(db: Session = Depends(get_db)):
-    return {
-        "total_customers": count_unique_customers(db)
-    }
-
-@app.get("/sales/region")
-def region_sales(db: Session = Depends(get_db)):
-    return sales_by_region(db)
-
-@app.get("/sales/category")
-def category_sales(db: Session = Depends(get_db)):
-    return sales_by_category(db)
-
-@app.get("/sales/segment")
-def segment_sales(db: Session = Depends(get_db)):
-    return sales_by_segment(db)
+@app.get("/db/indexes")
+def show_indexes():
+    db = open_session()
+    try:
+        result = db.execute(text(
+            "SELECT name FROM sqlite_master WHERE type='index'"
+        ))
+        indexes = [row[0] for row in result.fetchall()]
+        return {"indexes": indexes}
+    finally:
+        close_session(db)
