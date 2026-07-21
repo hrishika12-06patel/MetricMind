@@ -12,6 +12,10 @@ from database import (
     calculate_average_discount,
     calculate_average_sales,
     calculate_total_quantity,
+    count_unique_customers,
+    sales_by_region,
+    sales_by_category,
+    sales_by_segment
 )
 
 app = FastAPI()
@@ -62,3 +66,21 @@ def total_quantity(db: Session = Depends(get_db)):
     return {
         "total_quantity": calculate_total_quantity(db)
     }
+
+@app.get("/customers/count")
+def customer_count(db: Session = Depends(get_db)):
+    return {
+        "total_customers": count_unique_customers(db)
+    }
+
+@app.get("/sales/region")
+def region_sales(db: Session = Depends(get_db)):
+    return sales_by_region(db)
+
+@app.get("/sales/category")
+def category_sales(db: Session = Depends(get_db)):
+    return sales_by_category(db)
+
+@app.get("/sales/segment")
+def segment_sales(db: Session = Depends(get_db)):
+    return sales_by_segment(db)

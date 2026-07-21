@@ -75,3 +75,54 @@ def calculate_total_quantity(db):
     row = result.fetchone()
 
     return row._mapping["total_quantity"] or 0
+
+def count_unique_customers(db):
+    result = db.execute(
+        text("SELECT COUNT(DISTINCT customer_id) AS total_customers FROM orders")
+    )
+
+    row = result.fetchone()
+
+    return row._mapping["total_customers"] or 0
+
+def sales_by_region(db):
+    result = db.execute(
+        text("""
+        SELECT region,
+               SUM(sales) AS total_sales
+        FROM orders
+        GROUP BY region
+        """)
+    )
+
+    rows = result.fetchall()
+
+    return [dict(row._mapping) for row in rows]
+
+def sales_by_category(db):
+    result = db.execute(
+        text("""
+        SELECT category,
+               SUM(sales) AS total_sales
+        FROM orders
+        GROUP BY category
+        """)
+    )
+
+    rows = result.fetchall()
+
+    return [dict(row._mapping) for row in rows]
+
+def sales_by_segment(db):
+    result = db.execute(
+        text("""
+        SELECT segment,
+               SUM(sales) AS total_sales
+        FROM orders
+        GROUP BY segment
+        """)
+    )
+
+    rows = result.fetchall()
+
+    return [dict(row._mapping) for row in rows]
