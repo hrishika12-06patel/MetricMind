@@ -42,7 +42,7 @@ export default function Dashboard() {
             "Total Sales",
             "Profit",
             "Orders",
-            "Discount",
+            "Customers",
           ].map((item) => (
             <div
               key={item}
@@ -65,6 +65,64 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+      <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "20px",
+    marginTop: "30px",
+  }}
+>
+  <div
+    style={{
+      background: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      minHeight: "250px",
+    }}
+  >
+    <h3>Sales Chart</h3>
+
+    <div
+      style={{
+        height: "180px",
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: "8px",
+      }}
+    >
+      📊 Bar Chart Placeholder
+    </div>
+  </div>
+
+  <div
+    style={{
+      background: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      minHeight: "250px",
+    }}
+  >
+    <h3>Customer Distribution</h3>
+
+    <div
+      style={{
+        height: "180px",
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: "8px",
+      }}
+    >
+      🥧 Pie Chart Placeholder
+    </div>
+  </div>
+</div>
       </main>
     </div>
   );
