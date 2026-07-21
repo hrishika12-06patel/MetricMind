@@ -52,10 +52,10 @@ def calculate_total_profit(db):
 def create_indexes(engine):
     with engine.connect() as conn:
         indexes = [
-            "CREATE INDEX IF NOT EXISTS idx_order_id ON orders (order_id)",
-            "CREATE INDEX IF NOT EXISTS idx_customer_id ON orders (customer_id)",
-            "CREATE INDEX IF NOT EXISTS idx_region ON orders (region)",
-            "CREATE INDEX IF NOT EXISTS idx_category ON orders (category)",
+            'CREATE INDEX IF NOT EXISTS idx_order_id ON orders ("Order.ID")',
+            'CREATE INDEX IF NOT EXISTS idx_customer_id ON orders ("Customer.ID")',
+            'CREATE INDEX IF NOT EXISTS idx_region ON orders ("Region")',
+            'CREATE INDEX IF NOT EXISTS idx_category ON orders ("Category")',
         ]
         for idx in indexes:
             try:
