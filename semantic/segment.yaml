@@ -1,0 +1,19 @@
+dimension:
+  name: segment
+
+  display_name: Customer Segment
+
+  description: >
+    Customer classification based on business rules.
+
+  source:
+    table: orders
+
+  column: segment
+
+  relationships:
+    - has_many: customer
+
+  business_use:
+    - Segment analysis
+    - Marketing insights

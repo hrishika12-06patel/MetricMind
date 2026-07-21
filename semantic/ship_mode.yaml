@@ -1,0 +1,16 @@
+dimension:
+  name: ship_mode
+
+  display_name: Ship Mode
+
+  description: >
+    Shipping method used for customer orders.
+
+  source:
+    table: orders
+
+  column: ship_mode
+
+  business_use:
+    - Delivery analysis
+    - Shipping performance
