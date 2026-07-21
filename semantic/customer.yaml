@@ -1,0 +1,25 @@
+dimension:
+  name: customer
+
+  display_name: Customer
+
+  description: >
+    Represents a customer who places one or more orders. This dimension
+    is used to group and filter business metrics by customer.
+
+  source:
+    table: orders
+
+  column: customer_id
+
+  relationships:
+    - belongs_to: segment
+
+  attributes:
+    - customer_id
+    - customer_name
+
+  business_use:
+    - Customer sales analysis
+    - Customer profitability
+    - Customer purchase history

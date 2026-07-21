@@ -1,0 +1,19 @@
+dimension:
+  name: category
+
+  display_name: Category
+
+  description: >
+    High-level product category.
+
+  source:
+    table: orders
+
+  column: category
+
+  relationships:
+    - has_many: sub_category
+
+  business_use:
+    - Category performance
+    - Revenue by category

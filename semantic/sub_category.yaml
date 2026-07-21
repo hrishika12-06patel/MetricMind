@@ -1,0 +1,19 @@
+dimension:
+  name: sub_category
+
+  display_name: Sub Category
+
+  description: >
+    Product grouping inside a category.
+
+  source:
+    table: orders
+
+  column: sub_category
+
+  relationships:
+    - belongs_to: category
+
+  business_use:
+    - Product analysis
+    - Sub-category profitability

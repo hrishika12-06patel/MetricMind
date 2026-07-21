@@ -1,0 +1,17 @@
+dimension:
+  name: region
+
+  display_name: Region
+
+  description: >
+    Geographic region where the order was placed.
+
+  source:
+    table: orders
+
+  column: region
+
+  business_use:
+    - Regional sales analysis
+    - Regional profitability
+    - Regional customer distribution
