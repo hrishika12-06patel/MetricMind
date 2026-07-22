@@ -82,7 +82,7 @@ export default function Dashboard() {
       minHeight: "250px",
     }}
   >
-    <h3>Sales Chart</h3>
+    <h3>Sales Trend</h3>
 
     <div
       style={{
@@ -94,7 +94,7 @@ export default function Dashboard() {
         borderRadius: "8px",
       }}
     >
-      📊 Bar Chart Placeholder
+      📈 Sales Trend Placeholder
     </div>
   </div>
 
@@ -107,7 +107,7 @@ export default function Dashboard() {
       minHeight: "250px",
     }}
   >
-    <h3>Customer Distribution</h3>
+    <h3>Profit Trend</h3>
 
     <div
       style={{
@@ -119,7 +119,55 @@ export default function Dashboard() {
         borderRadius: "8px",
       }}
     >
-      🥧 Pie Chart Placeholder
+      📈 Profit Trend Placeholder
+    </div>
+  </div>
+  <div
+    style={{
+      background: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      minHeight: "250px",
+    }}
+  >
+    <h3>Category-wise Sales</h3>
+
+    <div
+      style={{
+        height: "180px",
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: "8px",
+      }}
+    >
+      📊 Category-wise Sales Placeholder
+    </div>
+  </div>
+  <div
+    style={{
+      background: "white",
+      padding: "20px",
+      borderRadius: "10px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      minHeight: "250px",
+    }}
+  >
+    <h3>Region-wise Sales</h3>
+
+    <div
+      style={{
+        height: "180px",
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: "8px",
+      }}
+    >
+      🌍 Region-wise Sales Placeholder
     </div>
   </div>
 </div>
