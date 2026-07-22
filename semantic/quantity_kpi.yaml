@@ -1,0 +1,18 @@
+kpi:
+  name: Quantity KPI
+
+  description: >
+    Measures the total quantity of products sold.
+
+  source_metric: total_quantity
+
+  calculation_logic: >
+    Sum of quantity sold across all orders.
+
+  business_meaning: >
+    Indicates the total volume of products sold.
+
+  business_questions:
+    - How many products were sold?
+    - Which category sells the most units?
+    - What is the sales volume by region?
