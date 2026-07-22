@@ -73,3 +73,42 @@ def open_session():
 def close_session(db):
     db.close()
     print("✅ Session closed.")
+
+def get_sales_by_region(db):
+    result = db.execute(text("""
+        SELECT Region,
+               SUM(Sales) AS total_sales
+        FROM orders
+        GROUP BY Region
+        ORDER BY total_sales DESC
+    """))
+
+    rows = result.fetchall()
+
+    return [dict(row._mapping) for row in rows]
+
+def get_sales_by_category(db):
+    result = db.execute(text("""
+        SELECT Category,
+               SUM(Sales) AS total_sales
+        FROM orders
+        GROUP BY Category
+        ORDER BY total_sales DESC
+    """))
+
+    rows = result.fetchall()
+
+    return [dict(row._mapping) for row in rows]
+
+def get_sales_by_segment(db):
+    result = db.execute(text("""
+        SELECT Segment,
+               SUM(Sales) AS total_sales
+        FROM orders
+        GROUP BY Segment
+        ORDER BY total_sales DESC
+    """))
+
+    rows = result.fetchall()
+
+    return [dict(row._mapping) for row in rows]
