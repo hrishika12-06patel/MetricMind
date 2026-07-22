@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from database import (Base, engine, test_connection, get_db,
                       get_all_orders, count_total_orders,
                       calculate_total_sales, calculate_total_profit,
-                      create_indexes, open_session, close_session)
+                      create_indexes, open_session, close_session,
+                      get_sales_by_region, get_sales_by_category,
+                      get_sales_by_segment)
 from sqlalchemy import text
 
 app = FastAPI()
@@ -49,3 +51,16 @@ def show_indexes():
         return {"indexes": indexes}
     finally:
         close_session(db)
+
+@app.get("/sales/region")
+def sales_region(db: Session = Depends(get_db)):
+    return get_sales_by_region(db)
+
+@app.get("/sales/category")
+def sales_category(db: Session = Depends(get_db)):
+    return get_sales_by_category(db)
+
+@app.get("/sales/segment")
+def sales_segment(db: Session = Depends(get_db)):
+    return get_sales_by_segment(db)
+        
