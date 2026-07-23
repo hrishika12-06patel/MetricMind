@@ -1,0 +1,18 @@
+kpi:
+  name: Orders KPI
+
+  description: >
+    Measures the total number of customer orders.
+
+  source_metric: total_orders
+
+  calculation_logic: >
+    Count of unique order IDs.
+
+  business_meaning: >
+    Indicates customer purchasing activity.
+
+  business_questions:
+    - How many orders were placed?
+    - Which region has the highest orders?
+    - How do orders change over time?

@@ -1,0 +1,18 @@
+kpi:
+  name: Customer KPI
+
+  description: >
+    Measures the total number of unique customers.
+
+  source_metric: total_customers
+
+  calculation_logic: >
+    Count of distinct customer IDs.
+
+  business_meaning: >
+    Indicates the size of the customer base.
+
+  business_questions:
+    - How many customers do we have?
+    - Which segment has the most customers?
+    - Which region has the highest customer count?

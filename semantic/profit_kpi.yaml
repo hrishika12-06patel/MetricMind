@@ -1,0 +1,18 @@
+kpi:
+  name: Profit KPI
+
+  description: >
+    Measures the profit earned after deducting costs from revenue.
+
+  source_metric: total_profit
+
+  calculation_logic: >
+    Total revenue minus total cost.
+
+  business_meaning: >
+    Indicates how much profit the business earns.
+
+  business_questions:
+    - What is the total profit?
+    - Which region is most profitable?
+    - Which category contributes the highest profit?
