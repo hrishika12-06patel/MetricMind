@@ -87,17 +87,6 @@ The `docs/semantic_metrics.md` document defines the business metrics, dimensions
 
 This document serves as the foundation for implementing the Semantic Layer using Cube.dev/dbt and ensures that AI-generated business insights are consistent, accurate, and governed across the application.
 
-## Running the Backend
-
-1. Activate the virtual environment.
-2. Navigate to the `backend` folder.
-3. Start the FastAPI server:
-
-```bash
-uvicorn app:app --reload
-```
-
-4. Open `http://127.0.0.1:8000/docs` to access the API documentation.
 
 ## Features
 
@@ -106,3 +95,18 @@ uvicorn app:app --reload
 - REST APIs to retrieve orders and business metrics.
 - Semantic layer for business metric definitions.
 - Frontend dashboard (under development).
+
+## Running the Backend
+
+1. Navigate to the backend folder.
+
+2. Activate the virtual environment.
+
+3. Start the server:
+
+```bash
+uvicorn app:app --reload
+
+4. Open Swagger UI:
+
+http://127.0.0.1:8000/docs
