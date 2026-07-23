@@ -282,6 +282,34 @@ The following activities will build upon this research:
 
 ---
 
+## 11. Semantic Layer Completion
+
+The semantic layer has been completed with standardized business entity definitions, business metrics, and KPI documentation.
+
+### Business Entities
+- Product
+- Customer
+- Order
+- Region
+- Category
+- Segment
+- Ship Mode
+
+### Business Metrics
+- Revenue
+- Sales
+- Profit
+- Orders
+- Quantity
+- Discount
+
+### Benefits
+
+- Provides consistent business definitions for AI-driven querying.
+- Improves maintainability of the semantic layer.
+- Enables reusable business entities and metrics across dashboards.
+- Supports reliable semantic search and analytics.
+
 ## Conclusion
 
 Semantic metrics form the foundation of the MetricMind Semantic BI Engine. By defining standardized business metrics, formulas, and dimensions before development begins, the project ensures that AI-generated insights remain accurate, explainable, and consistent across all users and dashboards. This research document will serve as the reference for future Semantic Layer implementation, governance validation, and AI orchestration.

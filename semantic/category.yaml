@@ -1,19 +1,27 @@
-dimension:
+entity:
   name: category
 
   display_name: Category
 
   description: >
-    High-level product category.
+    Represents the primary classification of products. Categories are
+    used to organize products for sales, profit, and inventory analysis.
 
   source:
     table: orders
 
-  column: category
+  primary_key: category
+
+  attributes:
+    - category
+    - sub_category
 
   relationships:
+    - has_many: product
     - has_many: sub_category
 
   business_use:
-    - Category performance
-    - Revenue by category
+    - Category-wise sales analysis
+    - Category-wise profit analysis
+    - Product performance by category
+    - Inventory reporting

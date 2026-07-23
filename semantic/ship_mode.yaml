@@ -1,16 +1,26 @@
-dimension:
+entity:
   name: ship_mode
 
   display_name: Ship Mode
 
   description: >
-    Shipping method used for customer orders.
+    Represents the shipping method used to deliver customer orders.
+    This entity helps analyze delivery performance, shipping trends,
+    and customer preferences.
 
   source:
     table: orders
 
-  column: ship_mode
+  primary_key: ship_mode
+
+  attributes:
+    - ship_mode
+
+  relationships:
+    - ships: order
 
   business_use:
-    - Delivery analysis
-    - Shipping performance
+    - Shipping performance analysis
+    - Delivery trend analysis
+    - Order fulfillment analysis
+    - Customer shipping preferences

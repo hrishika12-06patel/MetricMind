@@ -1,33 +1,32 @@
-metric:
-  name: total_orders
+entity:
+  name: order
 
-  display_name: Total Orders
+  display_name: Order
 
   description: >
-    Counts the total number of customer orders.
-
-  type: measure
-
-  owner: Operations Team
+    Represents a customer purchase transaction. Orders connect customers,
+    products, shipping information, and business metrics such as sales,
+    profit, quantity, and discounts.
 
   source:
     table: orders
 
-  formula:
-    expression: COUNT(DISTINCT order_id)
+  primary_key: order_id
 
-  dimensions:
+  attributes:
+    - order_id
     - order_date
+    - customer_id
+    - ship_mode
     - region
-    - product_line
-    - customer_segment
 
-  aggregation: countDistinct
+  relationships:
+    - belongs_to: customer
+    - contains: product
+    - shipped_by: ship_mode
 
-  business_questions:
-    - Total orders.
-    - Orders by region.
-    - Monthly order count.
-
-  notes:
-    - Uses DISTINCT order_id to avoid duplicate counting.
+  business_use:
+    - Order tracking
+    - Revenue analysis
+    - Sales reporting
+    - Customer purchase analysis
