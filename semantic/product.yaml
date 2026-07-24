@@ -1,0 +1,29 @@
+entity:
+  name: product
+
+  display_name: Product
+
+  description: >
+    Represents the products purchased by customers. This entity is used
+    to analyze sales, profit, quantity sold, and product performance.
+
+  source:
+    table: orders
+
+  primary_key: product_id
+
+  attributes:
+    - product_id
+    - product_name
+    - category
+    - sub_category
+
+  relationships:
+    - belongs_to: category
+    - appears_in: order
+
+  business_use:
+    - Product sales analysis
+    - Product profitability
+    - Category-wise performance
+    - Inventory reporting

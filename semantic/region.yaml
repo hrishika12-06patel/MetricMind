@@ -1,17 +1,27 @@
-dimension:
+entity:
   name: region
 
   display_name: Region
 
   description: >
-    Geographic region where the order was placed.
+    Represents the geographical area where customer orders are placed.
+    This entity enables regional analysis of sales, profit, customers,
+    and business performance.
 
   source:
     table: orders
 
-  column: region
+  primary_key: region
+
+  attributes:
+    - region
+
+  relationships:
+    - contains: customer
+    - contains: order
 
   business_use:
     - Regional sales analysis
-    - Regional profitability
-    - Regional customer distribution
+    - Regional profit analysis
+    - Customer distribution
+    - Business performance by region

@@ -1,19 +1,26 @@
-dimension:
+entity:
   name: segment
 
   display_name: Customer Segment
 
   description: >
-    Customer classification based on business rules.
+    Represents the classification of customers based on business
+    criteria. Segments help analyze purchasing behavior, sales,
+    and profitability across different customer groups.
 
   source:
     table: orders
 
-  column: segment
+  primary_key: segment
+
+  attributes:
+    - segment
 
   relationships:
     - has_many: customer
 
   business_use:
-    - Segment analysis
-    - Marketing insights
+    - Customer segmentation
+    - Sales by segment
+    - Profit by segment
+    - Marketing analysis
