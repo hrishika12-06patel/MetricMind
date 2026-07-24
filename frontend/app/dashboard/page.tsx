@@ -1,4 +1,8 @@
 import DashboardNavbar from "../../components/DashboardNavbar";
+import SalesTrendChart from "@/components/charts/SalesTrendChart";
+import ProfitTrendChart from "@/components/charts/ProfitTrendChart";
+import CategorySalesChart from "@/components/charts/CategorySalesChart";
+import RegionSalesChart from "@/components/charts/RegionSalesChart";
 export default function Dashboard() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -79,14 +83,14 @@ export default function Dashboard() {
       padding: "20px",
       borderRadius: "10px",
       boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      minHeight: "250px",
+      minHeight: "360px",
     }}
   >
     <h3>Sales Trend</h3>
 
     <div
       style={{
-        height: "180px",
+        height: "280px",
         background: "#f3f4f6",
         display: "flex",
         justifyContent: "center",
@@ -94,7 +98,7 @@ export default function Dashboard() {
         borderRadius: "8px",
       }}
     >
-      📈 Sales Trend Placeholder
+      <SalesTrendChart />
     </div>
   </div>
 
@@ -111,7 +115,7 @@ export default function Dashboard() {
 
     <div
       style={{
-        height: "180px",
+        height: "280px",
         background: "#f3f4f6",
         display: "flex",
         justifyContent: "center",
@@ -119,7 +123,7 @@ export default function Dashboard() {
         borderRadius: "8px",
       }}
     >
-      📈 Profit Trend Placeholder
+      <ProfitTrendChart />
     </div>
   </div>
   <div
@@ -135,7 +139,7 @@ export default function Dashboard() {
 
     <div
       style={{
-        height: "180px",
+        height: "280px",
         background: "#f3f4f6",
         display: "flex",
         justifyContent: "center",
@@ -143,7 +147,7 @@ export default function Dashboard() {
         borderRadius: "8px",
       }}
     >
-      📊 Category-wise Sales Placeholder
+      <CategorySalesChart />
     </div>
   </div>
   <div
@@ -159,7 +163,7 @@ export default function Dashboard() {
 
     <div
       style={{
-        height: "180px",
+        height: "280px",
         background: "#f3f4f6",
         display: "flex",
         justifyContent: "center",
@@ -167,7 +171,7 @@ export default function Dashboard() {
         borderRadius: "8px",
       }}
     >
-      🌍 Region-wise Sales Placeholder
+      <RegionSalesChart />
     </div>
   </div>
 </div>
