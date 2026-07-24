@@ -110,3 +110,25 @@ uvicorn app:app --reload
 4. Open Swagger UI:
 
 http://127.0.0.1:8000/docs
+
+## API Endpoints
+
+### General
+- GET /
+- GET /health
+- GET /api-info
+
+### Orders
+- GET /orders
+- GET /orders/count
+
+### Sales
+- GET /orders/total-sales
+- GET /orders/total-profit
+- GET /sales/region
+- GET /sales/category
+- GET /sales/segment
+
+### Database
+- GET /db-test
+- GET /db/indexes
