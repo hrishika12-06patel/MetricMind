@@ -35,3 +35,35 @@ Logical groupings of existing cubes.
 - Verify discount_amount exists.
 - Verify multi-currency support.
 - Merge duplicate order count definitions.
+
+## Semantic Layer
+
+### Business Entities
+
+- Customer
+- Product
+- Order
+- Region
+- Category
+- Segment
+- Ship Mode
+
+### Business Metrics
+
+- Revenue
+- Sales
+- Profit
+- Orders
+- Quantity
+- Discount
+
+### KPI Documentation
+
+- Sales KPI
+- Profit KPI
+- Orders KPI
+- Customer KPI
+- Quantity KPI
+- Discount KPI
+
+The semantic layer now contains standardized business entities, metrics, and KPI definitions to support future AI-driven querying and business analytics.
