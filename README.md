@@ -132,3 +132,16 @@ http://127.0.0.1:8000/docs
 ### Database
 - GET /db-test
 - GET /db/indexes
+
+## Orders API
+
+The `/orders` endpoint supports:
+
+- Filtering by `region`
+- Filtering by `category`
+- Filtering by `segment`
+- Pagination using `page` and `limit`
+
+Example:
+
+GET /orders?region=West&page=1&limit=10
