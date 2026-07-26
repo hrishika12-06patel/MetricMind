@@ -1,5 +1,7 @@
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import EmptyState from "@/components/EmptyState";
+import DashboardFilters from "@/components/DashboardFilters";
+import Pagination from "@/components/Pagination";
 import DashboardNavbar from "../../components/DashboardNavbar";
 import SalesTrendChart from "@/components/charts/SalesTrendChart";
 import ProfitTrendChart from "@/components/charts/ProfitTrendChart";
@@ -109,7 +111,7 @@ export default function Dashboard() {
          Jul 21 – Jul 27, 2026
         </div>
         </div>
-
+        <DashboardFilters />
         <div
           style={{
             display: "grid",
@@ -303,6 +305,7 @@ export default function Dashboard() {
     </div>
   </div>
 </div>
+<Pagination />
       </main>
     </div>
   );
