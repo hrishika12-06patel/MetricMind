@@ -38,7 +38,7 @@ def db_test():
     "/orders",
     tags=["Orders"],
     summary="Get Orders",
-    description="Returns all orders with optional filtering and pagination."
+    description="Returns all orders with optional filtering, sorting and pagination."
 )
 def get_orders(
     region: str | None = Query(default=None, description="Filter by region"),
@@ -46,19 +46,64 @@ def get_orders(
     segment: str | None = Query(default=None, description="Filter by segment"),
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=20, ge=1, le=100, description="Number of records per page"),
+    sort_by: str | None = Query(
+        default=None,
+        description="Sort by Sales, Profit, Region or Category"
+    ),
+    order: str = Query(
+        default="asc",
+        description="Sorting order: asc or desc"
+    ),
     db: Session = Depends(get_db)
 ):
     orders = get_all_orders(db)
 
+    # Filter by Region
     if region:
-        orders = [o for o in orders if str(o.get("Region", "")).lower() == region.lower()]
+        orders = [
+            o for o in orders
+            if str(o.get("Region", "")).lower() == region.lower()
+        ]
 
+    # Filter by Category
     if category:
-        orders = [o for o in orders if str(o.get("Category", "")).lower() == category.lower()]
+        orders = [
+            o for o in orders
+            if str(o.get("Category", "")).lower() == category.lower()
+        ]
 
+    # Filter by Segment
     if segment:
-        orders = [o for o in orders if str(o.get("Segment", "")).lower() == segment.lower()]
+        orders = [
+            o for o in orders
+            if str(o.get("Segment", "")).lower() == segment.lower()
+        ]
 
+    # Sorting
+    allowed_fields = [
+        "Sales",
+        "Profit",
+        "Region",
+        "Category"
+    ]
+
+    if sort_by:
+
+        if sort_by not in allowed_fields:
+            return {
+                "error": "Invalid sort field.",
+                "allowed_fields": allowed_fields
+            }
+
+        reverse = order.lower() == "desc"
+
+        orders = sorted(
+            orders,
+            key=lambda x: x.get(sort_by),
+            reverse=reverse
+        )
+
+    # Pagination
     start = (page - 1) * limit
     end = start + limit
 

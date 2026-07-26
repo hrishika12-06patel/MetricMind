@@ -145,3 +145,25 @@ The `/orders` endpoint supports:
 Example:
 
 GET /orders?region=West&page=1&limit=10
+
+### Sorting
+
+The Orders API supports sorting using:
+
+- sort_by
+- order
+
+Supported fields:
+
+- Sales
+- Profit
+- Region
+- Category
+
+Examples:
+
+GET /orders?sort_by=Sales
+
+GET /orders?sort_by=Profit&order=desc
+
+GET /orders?region=West&sort_by=Sales
