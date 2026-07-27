@@ -79,7 +79,7 @@ export default function Dashboard() {
         style={{
           flex: 1,
           background: "#f8fafc",
-          padding: "30px",
+          padding: "20px",
         }}
       >
         <DashboardNavbar />
@@ -89,15 +89,30 @@ export default function Dashboard() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginTop: "30px",
-          marginBottom: "20px",
+          marginTop: "20px",
+          marginBottom: "15px",
          }}
         >
          <div>
-          <h1 style={{ margin: 0 }}>Dashboard</h1>
-          <p style={{ color: "#6b7280", marginTop: "5px" }}>
-          Welcome back! Here's your business overview.
-         </p>
+          <h1
+          style={{
+           margin: 0,
+           fontSize: "30px",
+           fontWeight: "700",
+           color: "#111827",
+          }}
+          >
+            Dashboard
+          </h1>
+          <p
+           style={{
+             color: "#6b7280",
+             marginTop: "8px",
+             fontSize: "16px",
+            }}
+          >
+           Welcome back! Here's your business overview.
+          </p>
         </div>
 
         <div
@@ -117,7 +132,7 @@ export default function Dashboard() {
            display: "flex",
            justifyContent: "space-between",
            alignItems: "center",
-           marginTop: "20px",
+           marginTop: "10px",
            gap: "15px",
            flexWrap: "wrap",
           }}
@@ -143,11 +158,11 @@ export default function Dashboard() {
               key={item}
               style={{
                background: "white",
-               padding: "24px",
-               borderRadius: "16px",
+               padding: "20px",
+               borderRadius: "12px",
                border: "1px solid #e5e7eb",
-               boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
-               transition: "0.3s ease",
+               boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+               transition: "all 0.3s ease",
                cursor: "pointer",
               }}
             >
@@ -219,7 +234,15 @@ export default function Dashboard() {
       minHeight: "360px",
     }}
   >
-    <h3>Sales Trend</h3>
+    <h3
+     style={{
+      marginBottom: "16px",
+      color: "#111827",
+      fontWeight: "600",
+     }}
+    >
+     Sales Trend
+    </h3>
 
     <div
       style={{
@@ -244,13 +267,23 @@ export default function Dashboard() {
   <div
     style={{
       background: "white",
-      padding: "20px",
-      borderRadius: "10px",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      minHeight: "250px",
+      padding: "24px",
+      borderRadius: "16px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+      transition: "0.3s ease",
+      cursor: "pointer",
+      minHeight: "360px",
     }}
   >
-    <h3>Profit Trend</h3>
+    <h3
+     style={{
+      marginBottom: "16px",
+      color: "#111827",
+      fontWeight: "600",
+     }}
+    >
+     Profit Trend
+    </h3>
 
     <div
       style={{
@@ -274,13 +307,24 @@ export default function Dashboard() {
   <div
     style={{
       background: "white",
-      padding: "20px",
-      borderRadius: "10px",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      minHeight: "250px",
+      padding: "24px",
+      borderRadius: "16px",
+      border: "1px solid #e5e7eb",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      transition: "0.3s ease",
+      cursor: "pointer",
+      minHeight: "360px",
     }}
   >
-    <h3>Category-wise Sales</h3>
+    <h3
+     style={{
+      marginBottom: "16px",
+      color: "#111827",
+      fontWeight: "600",
+     }}
+    >
+     Category-wise Sales
+    </h3>
 
     <div
       style={{
@@ -304,13 +348,24 @@ export default function Dashboard() {
   <div
     style={{
       background: "white",
-      padding: "20px",
-      borderRadius: "10px",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      minHeight: "250px",
+      padding: "24px",
+      borderRadius: "16px",
+      border: "1px solid #e5e7eb",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+      transition: "0.3s ease",
+      cursor: "pointer",
+      minHeight: "360px",
     }}
   >
-    <h3>Region-wise Sales</h3>
+    <h3
+     style={{
+      marginBottom: "16px",
+      color: "#111827",
+      fontWeight: "600",
+     }}
+    >
+     Region-wise Sales
+    </h3>
 
     <div
       style={{
