@@ -3,6 +3,7 @@ import EmptyState from "@/components/EmptyState";
 import DashboardFilters from "@/components/DashboardFilters";
 import Pagination from "@/components/Pagination";
 import DashboardNavbar from "../../components/DashboardNavbar";
+import SortingDropdown from "@/components/SortingDropdown";
 import SalesTrendChart from "@/components/charts/SalesTrendChart";
 import ProfitTrendChart from "@/components/charts/ProfitTrendChart";
 import CategorySalesChart from "@/components/charts/CategorySalesChart";
@@ -111,7 +112,19 @@ export default function Dashboard() {
          Jul 21 – Jul 27, 2026
         </div>
         </div>
-        <DashboardFilters />
+        <div
+         style={{
+           display: "flex",
+           justifyContent: "space-between",
+           alignItems: "center",
+           marginTop: "20px",
+           gap: "15px",
+           flexWrap: "wrap",
+          }}
+        >
+          <DashboardFilters />
+          <SortingDropdown />
+        </div>
         <div
           style={{
             display: "grid",
@@ -129,13 +142,25 @@ export default function Dashboard() {
             <div
               key={item}
               style={{
-                background: "white",
-                padding: "20px",
-                borderRadius: "10px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+               background: "white",
+               padding: "24px",
+               borderRadius: "16px",
+               border: "1px solid #e5e7eb",
+               boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+               transition: "0.3s ease",
+               cursor: "pointer",
               }}
             >
-              <h3>{item}</h3>
+              <h3
+               style={{
+                 color: "#6b7280",
+                 fontSize: "15px",
+                 marginBottom: "10px",
+                 fontWeight: "600",
+                }}
+              >
+                {item}
+              </h3>
               <h2
                style={{
                 color:
@@ -149,6 +174,7 @@ export default function Dashboard() {
                 marginTop: "10px",
                 fontSize: "28px",
                 fontWeight: "bold",
+                letterSpacing: "0.5px",
                }}
               >
                {item === "Total Sales"
@@ -165,6 +191,7 @@ export default function Dashboard() {
                color: "#16a34a",
                fontWeight: "600",
                marginTop: "8px",
+               fontSize: "14px",
               }}
               >
                ▲ 12% from last month
