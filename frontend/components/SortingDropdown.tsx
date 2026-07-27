@@ -6,6 +6,7 @@ export default function SortingDropdown() {
         borderRadius: "8px",
         border: "1px solid #d1d5db",
         background: "white",
+        width: "160px",
         cursor: "pointer",
       }}
     >
