@@ -51,18 +51,36 @@ def db_test():
     description="Returns all orders with optional filtering, sorting and pagination."
 )
 def get_orders(
-    region: str | None = Query(default=None, description="Filter by region"),
-    category: str | None = Query(default=None, description="Filter by category"),
-    segment: str | None = Query(default=None, description="Filter by segment"),
-    page: int = Query(default=1, ge=1, description="Page number"),
-    limit: int = Query(default=20, ge=1, le=100, description="Number of records per page"),
+    region: str | None = Query(
+        default=None,
+        description="Filter orders by region (e.g., East, West, South, Central)."
+    ),
+    category: str | None = Query(
+        default=None,
+        description="Filter orders by product category (e.g., Furniture, Technology, Office Supplies)."
+    ),
+    segment: str | None = Query(
+        default=None,
+        description="Filter orders by customer segment (e.g., Consumer, Corporate, Home Office)."
+    ),
+    page: int = Query(
+        default=1,
+        ge=1,
+        description="Page number for paginated results. Must be greater than or equal to 1."
+    ),
+    limit: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+        description="Number of records to return per page. Allowed range: 1 to 100."
+    ),
     sort_by: str | None = Query(
         default=None,
-        description="Sort by Sales, Profit, Region or Category"
+        description="Sort results by Sales, Profit, Region, or Category."
     ),
     order: str = Query(
         default="asc",
-        description="Sorting order: asc or desc"
+        description="Sorting order. Use 'asc' for ascending or 'desc' for descending."
     ),
     db: Session = Depends(get_db)
 ):
@@ -96,21 +114,35 @@ def get_orders(
         "Region",
         "Category"
     ]
+    selected_field = None
 
     if sort_by:
+        field_mapping = {
+            "sales": "Sales",
+            "profit": "Profit",
+            "region": "Region",
+            "category": "Category"
+        }
 
-        if sort_by not in allowed_fields:
+        selected_field = field_mapping.get(sort_by.lower())
+
+        if selected_field is None:
             return {
                 "success": False,
                 "message": "Invalid sort field.",
                 "allowed_fields": allowed_fields
             }
-
+        if order.lower() not in ["asc", "desc"]:
+            return {
+                "success": False,
+                "message": "Invalid order value.",
+                "allowed_values": ["asc", "desc"]
+            }
         reverse = order.lower() == "desc"
 
         orders = sorted(
             orders,
-            key=lambda x: x.get(sort_by),
+            key=lambda x: x.get(selected_field),
             reverse=reverse
         )
 
