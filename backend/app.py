@@ -44,6 +44,30 @@ def db_test():
             "message": str(e)
         }
 
+@app.get("/health")
+def health_check():
+    return {
+        "success": True,
+        "message": "API is healthy.",
+        "data": {
+            "status": "running"
+        }
+    }
+
+@app.get("/info")
+def project_info():
+    return {
+        "success": True,
+        "message": "Project information retrieved successfully.",
+        "data": {
+            "project_name": "MetricMind",
+            "version": "1.0.0",
+            "database": "SQLite",
+            "framework": "FastAPI"
+        }
+    }
+
+
 @app.get(
     "/orders",
     tags=["Orders"],
