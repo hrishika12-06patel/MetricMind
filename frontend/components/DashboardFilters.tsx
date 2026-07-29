@@ -16,22 +16,28 @@ export default function DashboardFilters() {
         type="text"
         placeholder="Search..."
         style={{
-          flex: "1",
-          minWidth: "220px",
-          padding: "10px 14px",
+          padding: "12px 16px",
+          fontSize: "15px",
+          borderRadius: "10px",
           border: "1px solid #d1d5db",
-          borderRadius: "8px",
+          background: "#ffffff",
           outline: "none",
-          fontSize: "14px",
+          width: "220px",
+          height: "44px",
         }}
       />
 
       {/* Region */}
       <select
         style={{
-          padding: "10px",
-          borderRadius: "8px",
+          padding: "12px 16px",
+          fontSize: "15px",
+          borderRadius: "10px",
           border: "1px solid #d1d5db",
+          background: "#ffffff",
+          cursor: "pointer",
+          height: "44px",
+          minWidth: "120px",
         }}
       >
         <option>Region</option>
@@ -44,9 +50,14 @@ export default function DashboardFilters() {
       {/* Category */}
       <select
         style={{
-          padding: "10px",
-          borderRadius: "8px",
+          padding: "12px 16px",
+          fontSize: "15px",
+          borderRadius: "10px",
           border: "1px solid #d1d5db",
+          background: "#ffffff",
+          cursor: "pointer",
+          height: "44px",
+          minWidth: "120px",
         }}
       >
         <option>Category</option>
@@ -59,9 +70,14 @@ export default function DashboardFilters() {
       {/* Segment */}
       <select
         style={{
-          padding: "10px",
-          borderRadius: "8px",
+          padding: "12px 16px",
+          fontSize: "15px",
+          borderRadius: "10px",
           border: "1px solid #d1d5db",
+          background: "#ffffff",
+          cursor: "pointer",
+          height: "44px",
+          minWidth: "120px",
         }}
       >
         <option>Segment</option>
