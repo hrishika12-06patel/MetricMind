@@ -17,7 +17,7 @@ export default function Home() {
         return res.json();
       })
       .then((data) => {
-        setOrders(data);
+        setOrders(data.data);
         setLoading(false);
       })
       .catch(() => {
