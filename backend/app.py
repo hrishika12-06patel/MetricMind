@@ -1,13 +1,21 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+
 from database import (
-    Base, engine, test_connection, get_db,
-    get_all_orders, count_total_orders,
-    calculate_total_sales, calculate_total_profit,
-    create_indexes, open_session, close_session
+    Base,
+    engine,
+    test_connection, 
+    get_db,
+    get_all_orders, 
+    count_total_orders,
+    calculate_total_sales, 
+    calculate_total_profit,
+    create_indexes, 
+    open_session, 
+    close_session
 )
 
 @asynccontextmanager
@@ -37,7 +45,14 @@ app.add_middleware(
 )
 @app.get("/")
 def root():
-    return {"message": "Backend is running!"}
+    return {
+         "success": True,
+        "message": "Backend is running.",
+        "data": {
+            "project": "MetricMind",
+            "version": "1.0.0"
+        }
+    }
 
 @app.get("/db-test")
 def db_test():
