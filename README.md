@@ -42,10 +42,41 @@ The project includes an automated ETL script that:
 - Creates Year, Month, and Quarter features
 - Saves a cleaned dataset for downstream analysis
 
+## Database Design
+
+The project uses a relational database to store the cleaned Global Superstore dataset.
+
+The Orders table stores sales, customer, product, and regional information.
+
+A database schema and ER diagram have been created as the foundation for backend APIs and semantic metrics.
+
+## Team
+-  Hrishika Patel
+-  Patati Yasawi
+-  Apurv Dwivedi
+-  Chinthala Akhilandeshwari
+
 ## Project Status
 
 🚧 Under Development
 
+## Frontend
+
+### Changes Made
+- Initialized the Next.js frontend.
+- Created the homepage.
+- Added a navigation bar.
+- Organized the frontend project structure.
+
+### Run the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:3000 in your browser.
 ---
 
 ## Documentation
@@ -55,3 +86,84 @@ The project includes an automated ETL script that:
 The `docs/semantic_metrics.md` document defines the business metrics, dimensions, formulas, and semantic concepts used by the MetricMind Semantic BI Engine.
 
 This document serves as the foundation for implementing the Semantic Layer using Cube.dev/dbt and ensures that AI-generated business insights are consistent, accurate, and governed across the application.
+
+
+## Features
+
+- FastAPI backend for serving analytics APIs.
+- SQLite database for storing order data.
+- REST APIs to retrieve orders and business metrics.
+- Semantic layer for business metric definitions.
+- Frontend dashboard (under development).
+
+## Running the Backend
+
+1. Navigate to the backend folder.
+
+2. Activate the virtual environment.
+
+3. Start the server:
+
+uvicorn app:app --reload
+
+4. Open Swagger UI:
+
+http://127.0.0.1:8000/docs
+
+
+## API Endpoints
+
+### General
+- GET /
+- GET /health
+- GET /api-info
+
+### Orders
+- GET /orders
+- GET /orders/count
+
+### Sales
+- GET /orders/total-sales
+- GET /orders/total-profit
+- GET /sales/region
+- GET /sales/category
+- GET /sales/segment
+
+### Database
+- GET /db-test
+- GET /db/indexes
+
+## Orders API
+
+The `/orders` endpoint supports:
+
+- Filtering by `region`
+- Filtering by `category`
+- Filtering by `segment`
+- Pagination using `page` and `limit`
+
+Example:
+
+GET /orders?region=West&page=1&limit=10
+
+### Sorting
+
+The Orders API supports sorting using:
+
+- sort_by
+- order
+
+Supported fields:
+
+- Sales
+- Profit
+- Region
+- Category
+
+Examples:
+
+GET /orders?sort_by=Sales
+
+GET /orders?sort_by=Profit&order=desc
+
+GET /orders?region=West&sort_by=Sales
