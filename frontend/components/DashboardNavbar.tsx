@@ -2,12 +2,12 @@ export default function DashboardNavbar() {
   return (
     <header
       style={{
-        height: "50px",
+        height: "72px",
         background: "#ffffff",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "0 20px",
+        padding: "0 32px",
         borderBottom: "1px solid #e5e7eb",
       }}
     >
@@ -23,12 +23,17 @@ export default function DashboardNavbar() {
       </h2>
 
       <div
-        style={{
-          fontSize: "15px",
-          fontWeight: "500",
-        }}
+       style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        fontWeight: "600",
+        color: "#374151",
+       }}
       >
-        👤 User
+       
+
+        <span>👤 User</span>
       </div>
     </header>
   );

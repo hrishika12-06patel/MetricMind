@@ -108,7 +108,8 @@ export default function Dashboard() {
            style={{
              color: "#6b7280",
              marginTop: "8px",
-             fontSize: "16px",
+             fontSize: "17px",
+             lineHeight: "26px",
             }}
           >
            Welcome back! Here's your business overview.
@@ -122,6 +123,7 @@ export default function Dashboard() {
           borderRadius: "10px",
           border: "1px solid #e5e7eb",
           fontWeight: "500",
+          color: "#374151"
          }}
         >
          Jul 21 – Jul 27, 2026
@@ -164,32 +166,73 @@ export default function Dashboard() {
                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                transition: "all 0.3s ease",
                cursor: "pointer",
+               display: "flex",
+               flexDirection: "column",
+               gap: "10px"
               }}
             >
-              <h3
+              <div
                style={{
-                 color: "#6b7280",
-                 fontSize: "15px",
-                 marginBottom: "10px",
-                 fontWeight: "600",
-                }}
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "12px",
+               }}
               >
-                {item}
-              </h3>
+               <div
+                 style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "22px",
+                  background:
+                   item === "Total Sales"
+                    ? "#dbeafe"
+                    : item === "Profit"
+                    ? "#dcfce7"
+                    : item === "Orders"
+                    ? "#ede9fe"
+                    : "#ffedd5",
+                 }}
+                >
+                 {item === "Total Sales"
+                  ? "💰"
+                  : item === "Profit"
+                  ? "📈"
+                  : item === "Orders"
+                  ? "📦"
+                  : "👥"}
+                </div>
+
+                <h3
+                 style={{
+                  color: "#374151",
+                  fontSize: "18px",
+                  fontWeight: "700",
+                  margin: 0,
+                 }}
+                >
+                 {item}
+                </h3>
+              </div>
               <h2
                style={{
                 color:
                  item === "Total Sales"
-                   ? "#2563eb"
+                   ? "#21408a"
                    : item === "Profit"
-                   ? "#16a34a"
+                   ? "#1b9347"
                    : item === "Orders"
-                   ? "#7c3aed"
-                   : "#ea580c",
+                   ? "#563989"
+                   : "rgb(183, 74, 11)",
                 marginTop: "10px",
-                fontSize: "28px",
+                fontSize: "34px",
                 fontWeight: "bold",
                 letterSpacing: "0.5px",
+                margin: 0,
                }}
               >
                {item === "Total Sales"
@@ -207,9 +250,10 @@ export default function Dashboard() {
                fontWeight: "600",
                marginTop: "8px",
                fontSize: "14px",
+               margin: 0,
               }}
               >
-               ▲ 12% from last month
+               ▲ 12% increase from last month
               </p>
             </div>
           ))}
@@ -288,7 +332,7 @@ export default function Dashboard() {
     <div
       style={{
         height: "280px",
-        background: "#f3f4f6",
+        background: "#ffffff",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
