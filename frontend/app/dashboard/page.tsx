@@ -1,3 +1,5 @@
+"use client";
+import {useEffect, useState} from "react";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import EmptyState from "@/components/EmptyState";
 import DashboardFilters from "@/components/DashboardFilters";
@@ -9,8 +11,32 @@ import ProfitTrendChart from "@/components/charts/ProfitTrendChart";
 import CategorySalesChart from "@/components/charts/CategorySalesChart";
 import RegionSalesChart from "@/components/charts/RegionSalesChart";
 export default function Dashboard() {
-  const isLoading = false;
-  const hasData = true;
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasData, setHasData] = useState(true);
+
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
+  useEffect(() => {
+   async function loadDashboardData() {
+    try {
+      const salesRes = await fetch("http://127.0.0.1:8000/orders/total-sales");
+      const salesData = await salesRes.json();
+      setTotalSales(salesData.total_sales);
+
+      const profitRes = await fetch("http://127.0.0.1:8000/orders/total-profit");
+      const profitData = await profitRes.json();
+      setTotalProfit(profitData.total_profit);
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setHasData(false);
+      setIsLoading(false);
+    }
+  }
+
+  loadDashboardData();
+}, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* Sidebar */}
@@ -236,9 +262,9 @@ export default function Dashboard() {
                }}
               >
                {item === "Total Sales"
-                 ? "₹1,25,000"
+                 ? `₹${totalSales.toLocaleString()}`
                  : item === "Profit"
-                 ? "₹32,500"
+                 ? `₹${totalProfit.toLocaleString()}`
                  : item === "Orders"
                  ? "248"
                  : "156"}
@@ -313,8 +339,9 @@ export default function Dashboard() {
       background: "white",
       padding: "24px",
       borderRadius: "16px",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
       transition: "0.3s ease",
+      border: "1px solid #e5e7eb",
       cursor: "pointer",
       minHeight: "360px",
     }}
@@ -332,11 +359,12 @@ export default function Dashboard() {
     <div
       style={{
         height: "280px",
-        background: "#ffffff",
+        background: "#f3f4f6",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         borderRadius: "8px",
+        
       }}
     >
       {isLoading ? (
