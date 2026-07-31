@@ -14,8 +14,6 @@ from database import (
     calculate_total_sales, 
     calculate_total_profit,
     create_indexes, 
-    open_session, 
-    close_session
 )
 
 @asynccontextmanager
