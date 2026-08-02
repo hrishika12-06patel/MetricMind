@@ -51,17 +51,17 @@ Verify that all backend APIs work correctly using Postman.
 
 ## Results
 
-| Test | Result |
-|------|--------|
-| Basic APIs | Pass |
-| Pagination | Pass |
-| Filtering | Pass |
-| Sorting | Pass |
-| Combined Query | Pass |
-| Invalid Page | Pass (422 returned) |
-| Invalid Limit | Pass (422 returned) |
-| Invalid Order | Returned 200 OK |
-| Invalid Sort Field | Returned 200 OK |
+| Test Scenario | Status | Remarks |
+|--------------|--------|---------|
+| Basic APIs | Pass | All endpoints returned expected responses |
+| Pagination | Pass | Pagination worked correctly |
+| Filtering | Pass | Region, Category, and Segment filters worked correctly |
+| Sorting | Pass | Sorting by Sales and Profit worked correctly |
+| Combined Query | Pass | Filtering, sorting, and pagination worked together |
+| Invalid Page | Pass | Returned HTTP 422 Validation Error |
+| Invalid Limit | Pass | Returned HTTP 422 Validation Error |
+| Invalid Order | Observation | Returned HTTP 200 instead of validation error |
+| Invalid Sort Field | Observation | Returned HTTP 200 instead of validation error |
 
 ## Issues Found
 

@@ -1,74 +1,276 @@
 # MetricMind
-Project - 1 for the Data Analytics Internship at Axlero Solutions.  
 
-An AI-powered Semantic Business Intelligence Engine that answers business questions using governed metrics instead of raw SQL.
+**MetricMind** is an AI-powered Semantic Business Intelligence Engine developed as part of the **Data Analytics Internship at Axlero Solutions**.
 
-## Tech Stack
+The project enables users to analyze business data through governed business metrics instead of writing raw SQL queries. It combines a FastAPI backend, semantic layer, SQLite database, and a Next.js frontend to deliver consistent and reliable business insights.
+
+---
+
+# Tech Stack
 
 - FastAPI
 - Next.js
 - LangChain
-- PostgreSQL
+- SQLite
 - Cube.dev
-- ECharts
+- Apache ECharts
+- SQLAlchemy
+- Postman
 
-## Dataset
+---
 
-Dataset: Global Superstore Dataset
+# Dataset
 
-Source: Kaggle
+**Dataset:** Global Superstore Dataset
 
-### Key Columns
+**Source:** Kaggle
+
+## Key Columns
 
 - Order Date
 - Sales
 - Profit
+- Quantity
+- Discount
 - Shipping Cost
 - Region
 - Country
 - Market
 - Category
 - Sub-Category
-- Customer Segment
+- Segment
 
-## ETL Pipeline
+The dataset is stored inside:
 
-The project includes an automated ETL script that:
+```
+data/raw/Global_Superstore.csv
+```
 
-- Reads the raw Global Superstore dataset
+---
+
+# ETL Pipeline
+
+The project contains an ETL pipeline that performs the following operations:
+
+- Reads the Global Superstore dataset
 - Removes duplicate records
 - Handles missing values
 - Converts date columns
 - Creates Year, Month, and Quarter features
-- Saves a cleaned dataset for downstream analysis
+- Saves the cleaned dataset
 
-## Database Design
+Processed dataset:
 
-The project uses a relational database to store the cleaned Global Superstore dataset.
+```
+data/processed/cleaned_superstore.csv
+```
 
-The Orders table stores sales, customer, product, and regional information.
+---
 
-A database schema and ER diagram have been created as the foundation for backend APIs and semantic metrics.
+# Database
 
-## Team
--  Hrishika Patel
--  Patati Yasawi
--  Apurv Dwivedi
--  Chinthala Akhilandeshwari
+MetricMind uses an SQLite database.
 
-## Project Status
+The database contains the cleaned Global Superstore dataset and supports all backend analytics APIs.
 
-🚧 Under Development
+Database files:
 
-## Frontend
+```
+database/
+│
+├── metricmind.db
+├── schema.sql
+└── create_database.py
+```
 
-### Changes Made
-- Initialized the Next.js frontend.
-- Created the homepage.
-- Added a navigation bar.
-- Organized the frontend project structure.
+---
 
-### Run the Frontend
+# Semantic Layer
+
+The semantic layer defines business entities, dimensions, KPIs, and governed metrics using YAML files.
+
+### Business Entities
+
+- Customer
+- Product
+- Orders
+- Sales
+- Profit
+- Quantity
+- Revenue
+- Category
+- Region
+- Segment
+- Ship Mode
+- Sub Category
+- Discount
+
+### KPI Definitions
+
+- Sales KPI
+- Profit KPI
+- Quantity KPI
+- Orders KPI
+- Customer KPI
+- Discount KPI
+
+Semantic definitions are available inside:
+
+```
+semantic/
+```
+
+---
+
+# Backend
+
+The FastAPI backend provides REST APIs for business analytics.
+
+Backend components include:
+
+- FastAPI
+- SQLAlchemy
+- SQLite
+- ETL Pipeline
+- Database Utilities
+- API Schemas
+- Database Index Verification
+
+---
+
+# Frontend
+
+The frontend is developed using **Next.js**.
+
+Current implementation includes:
+
+- Homepage
+- Dashboard
+- Navigation Bar
+- Dashboard Components
+- Charts
+- Global Styling
+
+---
+
+# Project Structure
+
+```
+MetricMind
+│
+├── backend
+│   ├── app.py
+│   ├── database.py
+│   ├── database_utils.py
+│   ├── schemas.py
+│   ├── verify_indexes.py
+│   ├── etl.py
+│   ├── requirements.txt
+│   └── API_DOCUMENTATION.md
+│
+├── data
+│   ├── raw
+│   │   └── Global_Superstore.csv
+│   │
+│   └── processed
+│       └── cleaned_superstore.csv
+│
+├── database
+│   ├── metricmind.db
+│   ├── schema.sql
+│   ├── create_database.py
+│   └── backups
+│
+├── semantic
+│   ├── customer.yaml
+│   ├── product.yaml
+│   ├── sales.yaml
+│   ├── orders.yaml
+│   ├── revenue.yaml
+│   ├── region.yaml
+│   ├── category.yaml
+│   ├── segment.yaml
+│   ├── ship_mode.yaml
+│   ├── sub_category.yaml
+│   ├── quantity.yaml
+│   ├── discount.yaml
+│   ├── profit.yaml
+│   └── *_kpi.yaml
+│
+├── frontend
+│
+├── docs
+│
+├── API_TESTING.md
+├── MetricMind.postman_collection.json
+└── README.md
+```
+
+---
+
+# Features
+
+- FastAPI REST APIs
+- SQLite Database
+- Semantic Business Layer
+- YAML-based KPI Definitions
+- ETL Pipeline
+- Swagger Documentation
+- Postman API Testing
+- Next.js Dashboard
+- Business Analytics APIs
+
+---
+
+# Running the Backend
+
+## Navigate to backend
+
+```bash
+cd backend
+```
+
+## Activate Virtual Environment
+
+### Windows
+
+```bash
+..\ .venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source ../.venv/bin/activate
+```
+
+## Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## Run the Backend
+
+```bash
+python -m uvicorn app:app --reload
+```
+
+Backend URL
+
+```
+http://127.0.0.1:8000
+```
+
+Swagger Documentation
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+# Running the Frontend
 
 ```bash
 cd frontend
@@ -76,94 +278,164 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser.
+Frontend URL
+
+```
+http://localhost:3000
+```
+
 ---
 
-## Documentation
+# API Endpoints
 
-### Semantic Metrics
+## General
 
-The `docs/semantic_metrics.md` document defines the business metrics, dimensions, formulas, and semantic concepts used by the MetricMind Semantic BI Engine.
-
-This document serves as the foundation for implementing the Semantic Layer using Cube.dev/dbt and ensures that AI-generated business insights are consistent, accurate, and governed across the application.
-
-
-## Features
-
-- FastAPI backend for serving analytics APIs.
-- SQLite database for storing order data.
-- REST APIs to retrieve orders and business metrics.
-- Semantic layer for business metric definitions.
-- Frontend dashboard (under development).
-
-## Running the Backend
-
-1. Navigate to the backend folder.
-
-2. Activate the virtual environment.
-
-3. Start the server:
-
-uvicorn app:app --reload
-
-4. Open Swagger UI:
-
-http://127.0.0.1:8000/docs
-
-
-## API Endpoints
-
-### General
 - GET /
 - GET /health
-- GET /api-info
+- GET /info
 
-### Orders
-- GET /orders
-- GET /orders/count
+## Database
 
-### Sales
-- GET /orders/total-sales
-- GET /orders/total-profit
-- GET /sales/region
-- GET /sales/category
-- GET /sales/segment
-
-### Database
 - GET /db-test
 - GET /db/indexes
 
-## Orders API
+## Orders
 
-The `/orders` endpoint supports:
+- GET /orders
+- GET /orders/count
 
-- Filtering by `region`
-- Filtering by `category`
-- Filtering by `segment`
-- Pagination using `page` and `limit`
+## Business Metrics
 
-Example:
+- GET /orders/total-sales
+- GET /orders/total-profit
 
-GET /orders?region=West&page=1&limit=10
+---
 
-### Sorting
+# Orders API
 
-The Orders API supports sorting using:
+The Orders API supports:
 
-- sort_by
-- order
+## Filtering
 
-Supported fields:
+- region
+- category
+- segment
+
+Example
+
+```
+GET /orders?region=East
+```
+
+---
+
+## Pagination
+
+Parameters:
+
+- page
+- limit
+
+Example
+
+```
+GET /orders?page=1&limit=20
+```
+
+---
+
+## Sorting
+
+Supported Fields
 
 - Sales
 - Profit
 - Region
 - Category
 
-Examples:
+Parameters
 
+- sort_by
+- order
+
+Examples
+
+```
 GET /orders?sort_by=Sales
+```
 
+```
 GET /orders?sort_by=Profit&order=desc
+```
 
-GET /orders?region=West&sort_by=Sales
+```
+GET /orders?region=East&page=1&limit=10&sort_by=Sales&order=desc
+```
+
+---
+
+# API Documentation
+
+Detailed API documentation is available in:
+
+```
+backend/API_DOCUMENTATION.md
+```
+
+It contains:
+
+- Endpoint descriptions
+- Query parameters
+- Sample requests
+- Sample responses
+- Usage examples
+
+---
+
+# API Testing
+
+All backend APIs have been tested using **Postman**.
+
+Testing includes:
+
+- Endpoint verification
+- Pagination
+- Filtering
+- Sorting
+- Invalid parameter validation
+
+Testing files:
+
+- API_TESTING.md
+- MetricMind.postman_collection.json
+
+---
+
+# Team
+
+- Hrishika Patel
+- Patati Yasaswi
+- Apurv Dwivedi
+- Chinthala Akhilandeshwari
+
+---
+
+# Project Status
+
+🚧 **Under Development**
+
+---
+
+# Contributing
+
+1. Create a feature branch.
+2. Commit your changes.
+3. Push the branch.
+4. Create a Pull Request.
+5. Wait for code review.
+
+---
+
+# License
+
+Developed as part of the **Axlero Solutions Data Analytics Internship**.

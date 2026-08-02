@@ -2,14 +2,20 @@
 
 ## Overview
 
-This document provides the API reference for the MetricMind backend. It describes each available endpoint, its purpose, request method, parameters, and example responses to help developers understand and use the APIs.
+This document provides the API reference for the MetricMind backend. It describes each available endpoint, its purpose, request method, query parameters, and example responses.
 
 ---
 
 # Base URL
 
 ```
-http://localhost:8000
+http://127.0.0.1:8000
+```
+
+Swagger Documentation
+
+```
+http://127.0.0.1:8000/docs
 ```
 
 ---
@@ -36,17 +42,97 @@ None
 GET /
 ```
 
-### Sample JSON Response
+### Sample Response
 
 ```json
 {
-    "message": "MetricMind API is running"
+    "success": true,
+    "message": "Backend is running.",
+    "data": {
+        "project": "MetricMind",
+        "version": "1.0.0"
+    }
 }
 ```
 
 ---
 
-# 2. Database Connection Test
+# 2. Health Check
+
+## Endpoint
+
+```
+GET /health
+```
+
+### Purpose
+
+Checks whether the backend API is healthy.
+
+### Query Parameters
+
+None
+
+### Sample Request
+
+```http
+GET /health
+```
+
+### Sample Response
+
+```json
+{
+    "success": true,
+    "message": "API is healthy.",
+    "data": {
+        "status": "running"
+    }
+}
+```
+
+---
+
+# 3. Project Information
+
+## Endpoint
+
+```
+GET /info
+```
+
+### Purpose
+
+Returns basic project information.
+
+### Query Parameters
+
+None
+
+### Sample Request
+
+```http
+GET /info
+```
+
+### Sample Response
+
+```json
+{
+    "success": true,
+    "message": "Project information retrieved successfully.",
+    "data": {
+        "project_name": "MetricMind",
+        "version": "1.0.0",
+        "database": "SQLite",
+        "framework": "FastAPI"
+    }
+}
+```
+
+---
+
+# 4. Database Connection Test
 
 ## Endpoint
 
@@ -56,7 +142,7 @@ GET /db-test
 
 ### Purpose
 
-Checks whether the backend can successfully connect to the database.
+Checks whether the backend can successfully connect to the SQLite database.
 
 ### Query Parameters
 
@@ -68,18 +154,18 @@ None
 GET /db-test
 ```
 
-### Example JSON Response
+### Sample Response
 
 ```json
 {
-    "status": "success",
-    "message": "Database connection successful"
+    "success": true,
+    "message": "Database connected successfully."
 }
 ```
 
 ---
 
-# 3. Get Orders
+# 5. Get Orders
 
 ## Endpoint
 
@@ -89,223 +175,282 @@ GET /orders
 
 ### Purpose
 
-Returns customer order records.
+Returns customer orders with optional filtering, sorting, and pagination.
 
-### Query Parameters
+---
+
+## Query Parameters
 
 | Parameter | Type | Description |
 |------------|------|-------------|
-| limit | Integer | Maximum number of records |
-| offset | Integer | Starting record |
+| region | String | Filter by region |
+| category | String | Filter by category |
+| segment | String | Filter by customer segment |
+| page | Integer | Page number (minimum 1) |
+| limit | Integer | Records per page (1–100) |
+| sort_by | String | Sales, Profit, Region, Category |
+| order | String | asc or desc |
 
-### Sample Request
+---
+
+## Sample Requests
+
+### Basic
 
 ```http
-GET /orders?limit=10&offset=0
+GET /orders
 ```
 
-### Example JSON Response
+### Pagination
 
-```json
-[
-    {
-        "order_id": "ORD-1001",
-        "customer_name": "John Doe",
-        "category": "Furniture",
-        "region": "West",
-        "sales": 250.75,
-        "profit": 45.25
-    }
-]
+```http
+GET /orders?page=2&limit=20
+```
+
+### Filtering
+
+```http
+GET /orders?region=East
+```
+
+```http
+GET /orders?category=Furniture
+```
+
+```http
+GET /orders?segment=Consumer
+```
+
+### Sorting
+
+```http
+GET /orders?sort_by=Sales&order=desc
+```
+
+### Combined
+
+```http
+GET /orders?region=East&page=1&limit=10&sort_by=Profit&order=desc
 ```
 
 ---
 
-# 4. Order Count
-
-## Endpoint
-
-```
-GET /orders/count
-```
-
-### Purpose
-
-Returns the total number of customer orders.
-
-### Query Parameters
-
-None
-
-### Sample Request
-
-```http
-GET /orders/count
-```
-
-### Example JSON Response
+## Sample Response
 
 ```json
 {
-    "total_orders": 9994
-}
-```
-
----
-
-# 5. Total Sales
-
-## Endpoint
-
-```
-GET /orders/total-sales
-```
-
-### Purpose
-
-Returns the total sales amount.
-
-### Query Parameters
-
-None
-
-### Sample Request
-
-```http
-GET /orders/total-sales
-```
-
-### Example JSON Response
-
-```json
-{
-    "net_sales": 2297200.86,
-    "gross_sales": 2450000.00
-}
-```
-
----
-
-# 6. Total Profit
-
-## Endpoint
-
-```
-GET /orders/total-profit
-```
-
-### Purpose
-
-Returns the total profit.
-
-### Query Parameters
-
-None
-
-### Sample Request
-
-```http
-GET /orders/total-profit
-```
-
-### Example JSON Response
-
-```json
-{
-    "total_profit": 286397.02,
-    "profit_margin": 0.125
-}
-```
-
----
-
-# 7. Database Indexes
-
-## Endpoint
-
-```
-GET /db/indexes
-```
-
-### Purpose
-
-Returns the database indexes available for query optimization.
-
-### Query Parameters
-
-None
-
-### Sample Request
-
-```http
-GET /db/indexes
-```
-
-### Example JSON Response
-
-```json
-{
-    "indexes": [
-        "order_id_idx",
-        "customer_id_idx",
-        "region_idx"
+    "success": true,
+    "message": "Orders fetched successfully.",
+    "page": 1,
+    "limit": 20,
+    "total_records": 9994,
+    "data": [
+        {
+            "Order ID": "CA-2014-100006",
+            "Region": "East",
+            "Category": "Furniture",
+            "Sales": 377.97,
+            "Profit": 45.25
+        }
     ]
 }
 ```
 
 ---
 
-# Pagination
+# 6. Order Count
 
-The `/orders` endpoint supports pagination.
+## Endpoint
 
-| Parameter | Description |
-|------------|-------------|
-| limit | Number of records returned |
-| offset | Starting position |
+```
+GET /orders/count
+```
 
-Example:
+### Purpose
+
+Returns the total number of orders.
+
+### Query Parameters
+
+None
+
+### Sample Request
 
 ```http
-GET /orders?limit=20&offset=40
+GET /orders/count
+```
+
+### Sample Response
+
+```json
+{
+    "success": true,
+    "message": "Total orders fetched successfully.",
+    "total_orders": 9994
+}
 ```
 
 ---
 
-# Filtering
+# 7. Total Sales
 
-The API can support filtering using query parameters.
+## Endpoint
 
-Possible filters:
+```
+GET /orders/total-sales
+```
+
+### Purpose
+
+Returns the total sales value.
+
+### Query Parameters
+
+None
+
+### Sample Request
+
+```http
+GET /orders/total-sales
+```
+
+### Sample Response
+
+```json
+{
+    "success": true,
+    "message": "Total sales calculated successfully.",
+    "total_sales": 2297200.86
+}
+```
+
+---
+
+# 8. Total Profit
+
+## Endpoint
+
+```
+GET /orders/total-profit
+```
+
+### Purpose
+
+Returns the total profit value.
+
+### Query Parameters
+
+None
+
+### Sample Request
+
+```http
+GET /orders/total-profit
+```
+
+### Sample Response
+
+```json
+{
+    "success": true,
+    "message": "Total profit calculated successfully.",
+    "total_profit": 286397.02
+}
+```
+
+---
+
+# 9. Database Indexes
+
+## Endpoint
+
+```
+GET /db/indexes
+```
+
+### Purpose
+
+Returns the database indexes created for query optimization.
+
+### Query Parameters
+
+None
+
+### Sample Request
+
+```http
+GET /db/indexes
+```
+
+### Sample Response
+
+```json
+{
+    "success": true,
+    "message": "Database indexes retrieved successfully.",
+    "indexes": [
+        "idx_order_id",
+        "idx_customer_id",
+        "idx_region",
+        "idx_category"
+    ]
+}
+```
+
+---
+
+# Orders API Features
+
+## Filtering
+
+Supported filters:
 
 - Region
 - Category
 - Segment
-- Order Date
 
-Example:
+Example
 
 ```http
-GET /orders?region=West
+GET /orders?region=East
 ```
 
 ---
 
-# Sorting
+## Pagination
 
-Results may be sorted using query parameters.
+Supported parameters:
 
-Example:
+- page
+- limit
+
+Example
 
 ```http
-GET /orders?sort=sales
+GET /orders?page=2&limit=20
 ```
 
-Possible sort fields:
+---
+
+## Sorting
+
+Supported fields:
 
 - Sales
 - Profit
-- Order Date
+- Region
+- Category
+
+Supported order values:
+
+- asc
+- desc
+
+Example
+
+```http
+GET /orders?sort_by=Sales&order=desc
+```
 
 ---
 
@@ -314,8 +459,7 @@ Possible sort fields:
 | Status Code | Description |
 |--------------|-------------|
 | 200 | Request Successful |
-| 400 | Bad Request |
-| 404 | Resource Not Found |
+| 422 | Validation Error |
 | 500 | Internal Server Error |
 
 ---
@@ -323,5 +467,12 @@ Possible sort fields:
 # Notes
 
 - All API responses are returned in JSON format.
-- Response validation is implemented using Pydantic models (`schemas.py`).
-- Example JSON responses shown in this document are provided for documentation purposes. Actual responses depend on the backend implementation.
+- The backend is developed using FastAPI.
+- Database operations use SQLAlchemy with SQLite.
+- Swagger documentation is available at:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+- Example responses shown in this document are for documentation purposes. Actual values depend on the data stored in the database.
