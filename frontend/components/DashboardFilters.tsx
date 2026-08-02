@@ -4,87 +4,114 @@ export default function DashboardFilters() {
       style={{
         display: "flex",
         flexWrap: "wrap",
-        gap: "15px",
-        justifyContent: "space-between",
+        gap: "20px",
         alignItems: "center",
+        justifyContent: "space-between",
         marginTop: "20px",
         marginBottom: "25px",
       }}
     >
-      {/* Search Box */}
-      <input
-        type="text"
-        placeholder="Search..."
+      {/* Left Side */}
+      <div
         style={{
-          padding: "12px 16px",
-          fontSize: "15px",
-          borderRadius: "10px",
-          border: "1px solid #d1d5db",
-          background: "#ffffff",
-          outline: "none",
-          width: "220px",
-          height: "44px",
-        }}
-      />
-
-      {/* Region */}
-      <select
-        style={{
-          padding: "12px 16px",
-          fontSize: "15px",
-          borderRadius: "10px",
-          border: "1px solid #d1d5db",
-          background: "#ffffff",
-          cursor: "pointer",
-          height: "44px",
-          minWidth: "120px",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "16px",
+          alignItems: "center",
+          flex: 1,
         }}
       >
-        <option>Region</option>
-        <option>North</option>
-        <option>South</option>
-        <option>East</option>
-        <option>West</option>
-      </select>
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="Search..."
+          style={{
+            width: "280px",
+            height: "46px",
+            padding: "0 16px",
+            borderRadius: "10px",
+            border: "1px solid #d1d5db",
+            backgroundColor: "#ffffff",
+            color: "#111827",
+            fontSize: "15px",
+            fontWeight: "500",
+            outline: "none",
+          }}
+        />
 
-      {/* Category */}
-      <select
-        style={{
-          padding: "12px 16px",
-          fontSize: "15px",
-          borderRadius: "10px",
-          border: "1px solid #d1d5db",
-          background: "#ffffff",
-          cursor: "pointer",
-          height: "44px",
-          minWidth: "120px",
-        }}
-      >
-        <option>Category</option>
-        <option>Electronics</option>
-        <option>Fashion</option>
-        <option>Home</option>
-        <option>Sports</option>
-      </select>
+        {/* Region */}
+        <select
+          style={{
+            width: "140px",
+            height: "46px",
+            padding: "0 12px",
+            borderRadius: "10px",
+            border: "1px solid #d1d5db",
+            backgroundColor: "#ffffff",
+            color: "#111827",
+            fontSize: "15px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Region
+          </option>
+          <option>East</option>
+          <option>West</option>
+          <option>South</option>
+          <option>Central</option>
+        </select>
 
-      {/* Segment */}
-      <select
-        style={{
-          padding: "12px 16px",
-          fontSize: "15px",
-          borderRadius: "10px",
-          border: "1px solid #d1d5db",
-          background: "#ffffff",
-          cursor: "pointer",
-          height: "44px",
-          minWidth: "120px",
-        }}
-      >
-        <option>Segment</option>
-        <option>Consumer</option>
-        <option>Corporate</option>
-        <option>Home Office</option>
-      </select>
+        {/* Category */}
+        <select
+          style={{
+            width: "150px",
+            height: "46px",
+            padding: "0 12px",
+            borderRadius: "10px",
+            border: "1px solid #d1d5db",
+            backgroundColor: "#ffffff",
+            color: "#111827",
+            fontSize: "15px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Category
+          </option>
+          <option>Furniture</option>
+          <option>Technology</option>
+          <option>Office Supplies</option>
+        </select>
+
+        {/* Segment */}
+        <select
+          style={{
+            width: "150px",
+            height: "46px",
+            padding: "0 12px",
+            borderRadius: "10px",
+            border: "1px solid #d1d5db",
+            backgroundColor: "#ffffff",
+            color: "#111827",
+            fontSize: "15px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Segment
+          </option>
+          <option>Consumer</option>
+          <option>Corporate</option>
+          <option>Home Office</option>
+        </select>
+      </div>
     </div>
   );
 }
