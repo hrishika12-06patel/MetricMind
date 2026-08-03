@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import {useEffect, useState} from "react";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import EmptyState from "@/components/EmptyState";
@@ -58,46 +59,62 @@ export default function Dashboard() {
          MetricMind
         </h2>
 
-        <p
+        <Link
+         href="/dashboard"
          style={{
+          display: "block",
           padding: "10px",
           borderRadius: "8px",
           background: "#334155",
           marginBottom: "10px",
           cursor: "pointer",
+          color: "white",
+          textDecoration: "none",
          }}
         >
          📊 Dashboard
-        </p>
+        </Link>
 
-        <p
+        <Link
+         href="/sales"
          style={{
+          display: "block",
           padding: "10px",
           marginBottom: "10px",
           cursor: "pointer",
+          color: "white",
+          textDecoration: "none",
          }}
         >
          💰 Sales
-        </p>
+        </Link>
 
-        <p
+        <Link
+         href="/orders"
          style={{
+          display: "block",
           padding: "10px",
           marginBottom: "10px",
           cursor: "pointer",
+          color: "white",
+          textDecoration: "none",
          }}
         >
          📦 Orders
-        </p>
+        </Link>
 
-        <p
+        <Link
+         href="/reports"
          style={{
+          display: "block",
           padding: "10px",
           cursor: "pointer",
+          color: "white",
+          textDecoration: "none",
          }}
         >
          📑 Reports
-        </p>
+        </Link>
       </aside>
       
       {/* Main Content */}
