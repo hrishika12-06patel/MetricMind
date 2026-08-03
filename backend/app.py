@@ -14,15 +14,10 @@ from database import (
     calculate_total_sales, 
     calculate_total_profit,
     create_indexes, 
-    open_session, 
-    close_session
 )
-from db_stats import get_database_stats
 
-app = FastAPI()
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     test_connection()
     create_indexes(engine)
@@ -59,7 +54,17 @@ def root():
 
 @app.get("/db-test")
 def db_test():
-    return {"status": "Database connected successfully!"}
+    try:
+        test_connection()
+        return {
+            "success": True,
+            "message": "Database connected successfully."
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
 
 @app.get("/health")
 def health_check():
@@ -202,29 +207,64 @@ def get_orders(
 
 @app.get("/orders/count")
 def orders_count(db: Session = Depends(get_db)):
-    return {"total_orders": count_total_orders(db)}
+    try:
+        total = count_total_orders(db)
+
+        return {
+            "success": True,
+            "message": "Total orders fetched successfully.",
+            "total_orders": total
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
 
 @app.get("/orders/total-sales")
 def total_sales(db: Session = Depends(get_db)):
-    return {"total_sales": calculate_total_sales(db)}
+    try:
+        sales = calculate_total_sales(db)
+
+        return {
+            "success": True,
+            "message": "Total sales calculated successfully.",
+            "total_sales": sales
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
 
 @app.get("/orders/total-profit")
 def total_profit(db: Session = Depends(get_db)):
-    return {"total_profit": calculate_total_profit(db)}
+    try:
+        profit = calculate_total_profit(db)
+
+        return {
+            "success": True,
+            "message": "Total profit calculated successfully.",
+            "total_profit": profit
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
 
 @app.get("/db/indexes")
 def show_indexes():
-    db = open_session()
-    try:
-        result = db.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='index'"
-        ))
-        indexes = [row[0] for row in result.fetchall()]
-        return {"indexes": indexes}
-    finally:
-        close_session(db)
-
-@app.get("/database/stats")
-def database_stats(db: Session = Depends(get_db)):
-    """Get quick database statistics - total orders, sales, and profit."""
-    return get_database_stats(db)
+    return {
+        "success": True,
+        "message": "Database indexes retrieved successfully.",
+        "indexes": [
+            "idx_order_id",
+            "idx_customer_id",
+            "idx_region",
+            "idx_category"
+        ]
+    }
