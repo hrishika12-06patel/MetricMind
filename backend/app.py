@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
+from db_stats import get_database_stats
 from database import (
     Base,
     engine,
@@ -268,3 +268,7 @@ def show_indexes():
             "idx_category"
         ]
     }
+
+@app.get("/database/stats")
+def database_stats(db: Session = Depends(get_db)):
+    return get_database_stats(db)
