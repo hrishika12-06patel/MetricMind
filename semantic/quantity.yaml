@@ -4,7 +4,9 @@ metric:
   display_name: Total Quantity Sold
 
   description: >
-    Total quantity of products sold.
+      Represents the total quantity of products sold across all customer
+      orders. This metric helps analyze product demand, sales volume,
+      inventory movement, and business growth over time.
 
   type: measure
 

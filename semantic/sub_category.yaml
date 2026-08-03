@@ -1,19 +1,24 @@
-dimension:
+entity:
   name: sub_category
 
   display_name: Sub Category
 
   description: >
-    Product grouping inside a category.
+    Represents the subdivision of a product category.
+    It helps analyze product performance at a more detailed level.
 
   source:
     table: orders
 
-  column: sub_category
+  primary_key: sub_category
+
+  attributes:
+    - sub_category
 
   relationships:
     - belongs_to: category
 
   business_use:
     - Product analysis
-    - Sub-category profitability
+    - Sub-category sales
+    - Profit analysis
