@@ -1,204 +1,160 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
+import Link from "next/link";
 import Navbar from "../components/Navbar";
-import DashboardFilters from "../components/DashboardFilters";
-import SortingDropdown from "../components/SortingDropdown";
-import Pagination from "../components/Pagination";
-import LoadingSkeleton from "../components/LoadingSkeleton";
-import EmptyState from "../components/EmptyState";
 
 export default function Home() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:8000/orders")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch orders");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setOrders(data.data || []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load data");
-        setLoading(false);
-      });
-  }, []);
+  const pages = [
+    {
+      title: "Dashboard",
+      icon: "📊",
+      description: "Monitor KPIs and business performance in one place.",
+      href: "/dashboard",
+    },
+    {
+      title: "Sales",
+      icon: "💰",
+      description: "Analyze revenue, profit and sales trends.",
+      href: "/sales",
+    },
+    {
+      title: "Orders",
+      icon: "📦",
+      description: "Track customer orders and order activity.",
+      href: "/orders",
+    },
+    {
+      title: "Reports",
+      icon: "📈",
+      description: "View and manage business reports.",
+      href: "/reports",
+    },
+  ];
 
   return (
     <>
       <Navbar />
 
       <main
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "30px",
-        }}
+       style={{
+        background: "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
+        minHeight: "100vh",
+        padding: "80px 40px",
+       }}
       >
-        <h1
+        <section
           style={{
-            marginBottom: "20px",
-            fontSize: "32px",
-            fontWeight: 700,
+            maxWidth: "1180px",
+            margin: "0 auto",
+            textAlign: "center",
           }}
         >
-          MetricMind
-        </h1>
-
-        {/* Filters */}
-        <DashboardFilters />
-
-        {/* Sorting */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "20px",
-          }}
-        >
-          <SortingDropdown />
-        </div>
-
-        {/* Loading */}
-        {loading && (
-          <div style={{ height: "350px" }}>
-            <LoadingSkeleton />
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div
+          <h1
             style={{
-              color: "#ef4444",
-              textAlign: "center",
-              marginTop: "40px",
-              fontSize: "18px",
+              fontSize: "54px",
+              fontWeight: "800",
+              color: "#52465A",
+              marginBottom: "18px",
             }}
           >
-            {error}
-          </div>
-        )}
+            MetricMind
+          </h1>
 
-        {/* Empty */}
-        {!loading && !error && orders.length === 0 && (
-          <div style={{ height: "300px" }}>
-            <EmptyState />
-          </div>
-        )}
+          <p
+            style={{
+              fontSize: "20px",
+              color: "#64748B",
+              maxWidth: "720px",
+              margin: "0 auto 60px",
+              lineHeight: "34px",
+              fontWeight: "400"
+            }}
+          >
+            Enterprise Analytics Platform for monitoring sales, orders,
+            business performance and reports through a clean and modern
+            dashboard.
+          </p>
 
-        {/* Table */}
-        {!loading && !error && orders.length > 0 && (
-          <>
-            <div
-              style={{
-                overflowX: "auto",
-                borderRadius: "12px",
-                border: "1px solid #374151",
-              }}
-            >
-              <table
+          <Link
+            href="/dashboard"
+            style={{
+              display: "inline-block",
+              background: "#794d6c",
+              color: "#fff",
+              padding: "14px 30px",
+              borderRadius: "12px",
+              textDecoration: "none",
+              fontWeight: "600",
+              marginBottom: "60px",
+            }}
+          >
+            Go to Dashboard →
+          </Link>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))",
+              gap: "24px",
+            }}
+          >
+            {pages.map((page) => (
+              <Link
+                key={page.title}
+                href={page.href}
                 style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  background: "#111827",
-                  color: "white",
+                  textDecoration: "none",
+                  color: "#111827",
+                  display: "block",
                 }}
               >
-                <thead
+                <div
                   style={{
-                    background: "#1f2937",
+                    background: "#FFFFFF",
+                    borderRadius: "18px",
+                    padding: "30px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+                    transition: "0.3s",
+                    cursor: "pointer",
+                    transform: "translateY(0)",
+                    overflow: "hidden",
+                    height: "100%",
                   }}
                 >
-                  <tr>
-                    <th
-                      style={{
-                        padding: "16px",
-                        textAlign: "left",
-                        borderBottom: "1px solid #374151",
-                      }}
-                    >
-                      Order ID
-                    </th>
+                  <div
+                    style={{
+                      fontSize: "52px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    {page.icon}
+                  </div>
 
-                    <th
-                      style={{
-                        padding: "16px",
-                        textAlign: "left",
-                        borderBottom: "1px solid #374151",
-                      }}
-                    >
-                      Customer
-                    </th>
+                  <h2
+                    style={{
+                      marginBottom: "14px",
+                      fontSize: "28px",
+                      fontWeight: "700",
+                      color: "#404e62"
+                    }}
+                  >
+                    {page.title}
+                  </h2>
 
-                    <th
-                      style={{
-                        padding: "16px",
-                        textAlign: "left",
-                        borderBottom: "1px solid #374151",
-                      }}
-                    >
-                      Product
-                    </th>
-
-                    <th
-                      style={{
-                        padding: "16px",
-                        textAlign: "right",
-                        borderBottom: "1px solid #374151",
-                      }}
-                    >
-                      Sales
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {orders.slice(0, 10).map((order: any, index: number) => (
-                    <tr
-                      key={index}
-                      style={{
-                        borderBottom: "1px solid #374151",
-                      }}
-                    >
-                      <td style={{ padding: "14px" }}>
-                        {order["Order.ID"]}
-                      </td>
-
-                      <td style={{ padding: "14px" }}>
-                        {order["Customer.Name"]}
-                      </td>
-
-                      <td style={{ padding: "14px" }}>
-                        {order["Product.Name"]}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "14px",
-                          textAlign: "right",
-                          fontWeight: 600,
-                        }}
-                      >
-                        ${Number(order["Sales"]).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <Pagination />
-          </>
-        )}
+                  <p
+                    style={{
+                      color: "#5e697d",
+                      lineHeight: "30px",
+                    }}
+                  >
+                    {page.description}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
     </>
   );
