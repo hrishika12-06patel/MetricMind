@@ -1,61 +1,82 @@
+import Link from "next/link";
+
 export default function Navbar() {
   return (
     <nav
       style={{
-        background: "#2563eb",
+        background: "#52465a",
         color: "white",
-        padding: "16px 24px",
+        padding: "18px 40px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        flexWrap: "wrap",
-        gap: "12px",
+        borderBottom: "1px solid #1F2937",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
       }}
     >
-      <a
+      <Link
         href="/"
         style={{
           color: "white",
           textDecoration: "none",
-          fontSize: "22px",
+          fontSize: "28px",
           fontWeight: "700",
+          letterSpacing: "0.5px",
         }}
       >
         MetricMind
-      </a>
+      </Link>
 
       <div
         style={{
           display: "flex",
-          gap: "24px",
-          flexWrap: "wrap",
+          gap: "28px",
+          alignItems: "center",
         }}
       >
-        <a
-          href="/"
+        <Link
+          href="/dashboard"
           style={{
             color: "white",
             textDecoration: "none",
+            fontWeight: "600",
           }}
         >
-          Home
-        </a>
+          Dashboard
+        </Link>
 
-        <span
+        <Link
+          href="/sales"
           style={{
-            color: "#dbeafe",
+            color: "white",
+            textDecoration: "none",
+            fontWeight: "600",
           }}
         >
-          About
-        </span>
+          Sales
+        </Link>
 
-        <span
+        <Link
+          href="/orders"
           style={{
-            color: "#dbeafe",
+            color: "white",
+            textDecoration: "none",
+            fontWeight: "600",
           }}
         >
-          Contact
-        </span>
+          Orders
+        </Link>
+
+        <Link
+          href="/reports"
+          style={{
+            color: "white",
+            textDecoration: "none",
+            fontWeight: "600",
+          }}
+        >
+          Reports
+        </Link>
       </div>
     </nav>
   );
