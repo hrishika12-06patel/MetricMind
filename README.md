@@ -221,6 +221,49 @@ MetricMind
 - Business Analytics APIs
 
 ---
+## AI Module
+
+MetricMind includes an AI-powered Business Intelligence module built using **LangChain** and **OpenAI**.
+
+### Features
+
+- LangChain integration for AI-powered insights
+- Modular AI architecture with separate service layer
+- Prompt templates for business-focused responses
+- Dataset summarization using natural language
+- FastAPI endpoint for AI insight generation
+- Environment-based API key configuration
+
+### AI Module Structure
+
+```text
+backend/
+└── ai/
+    ├── config.py
+    ├── llm_factory.py
+    ├── prompt_templates.py
+    ├── chains.py
+    ├── insight_service.py
+    ├── routes.py
+    └── test_ai.py
+```
+
+### AI Endpoint
+
+```
+POST /ai/summarize
+```
+
+### Example Request
+
+```json
+{
+  "dataset": "Sales: 100, 200, 300\nProfit: 20, 40, 50"
+}
+```
+
+> **Note:** A valid OpenAI API key must be configured in the `.env` file before using the AI endpoint.
+---
 
 # Running the Backend
 
@@ -439,3 +482,4 @@ Testing files:
 # License
 
 Developed as part of the **Axlero Solutions Data Analytics Internship**.
+

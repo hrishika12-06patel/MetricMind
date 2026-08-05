@@ -451,7 +451,116 @@ Example
 ```http
 GET /orders?sort_by=Sales&order=desc
 ```
+---
+---
 
+# 8. AI Sales Dataset Summary
+
+## Endpoint
+
+```
+POST /ai/summarize
+```
+
+### Purpose
+
+Generates an AI-powered business summary and insights for a given sales dataset using **LangChain** integrated with the **Google Gemini** Large Language Model (LLM).
+
+This endpoint analyzes the dataset and provides:
+
+- Executive Summary
+- Key Business Insights
+- Trends
+- Risks
+- Business Recommendations
+
+---
+
+### Request Method
+
+```
+POST
+```
+
+---
+
+### Request Body
+
+| Field | Type | Description |
+|--------|------|-------------|
+| dataset | String | Sales dataset to be analyzed by the AI model |
+
+---
+
+### Sample Request
+
+```http
+POST /ai/summarize
+```
+
+```json
+{
+    "dataset": "Sales: 120, 340, 280, 560, 410\nProfit: 20, 55, 45, 120, 70"
+}
+```
+
+---
+
+### Example JSON Response
+
+```json
+{
+    "success": true,
+    "summary": "Executive Summary\n\nThe analyzed dataset reflects healthy profitability with an overall profit margin of 18.13%. Larger transactions contribute significantly to revenue and profit. Recommendations include increasing average order value, optimizing lower-value transactions, and expanding data analysis using customer and product information."
+}
+```
+
+---
+
+### Possible Error Responses
+
+#### Invalid Request
+
+```json
+{
+    "detail": "dataset field is required."
+}
+```
+
+#### AI Service Error
+
+```json
+{
+    "detail": "Unable to generate AI insights."
+}
+```
+
+#### Internal Server Error
+
+```json
+{
+    "detail": "Internal Server Error"
+}
+```
+
+---
+
+### Technologies Used
+
+- FastAPI
+- LangChain
+- Google Gemini API
+- Prompt Templates
+- Service Layer Architecture
+
+---
+
+### Notes
+
+- A valid Google Gemini API key must be configured in the `.env` file.
+- AI responses are generated dynamically and may vary slightly for the same dataset.
+- The endpoint is intended for business intelligence and sales analytics use cases.
+- The LangChain workflow uses reusable prompt templates and a modular service architecture for maintainability.
 ---
 
 # HTTP Response Codes

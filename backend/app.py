@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from ai.routes import router as ai_router
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -32,6 +33,8 @@ app = FastAPI(
         "name": "MetricMind Team"
     }
 )
+app.include_router(ai_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
