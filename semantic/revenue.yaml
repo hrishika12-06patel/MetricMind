@@ -10,9 +10,10 @@ metric:
   display_name: Revenue
 
   description: >
-    Revenue represents the total net income generated from customer
-    sales after subtracting discounts and refunds.
-    This is the default revenue metric used across the application.
+      Represents the total revenue generated from customer orders.
+      Revenue is calculated using sales transactions and serves as the
+      primary business metric for analyzing financial performance,
+      growth trends, and overall business health.
 
   type: measure
 

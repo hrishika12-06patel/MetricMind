@@ -4,7 +4,9 @@ metric:
   display_name: Average Discount
 
   description: >
-    Average discount applied per customer order.
+      Represents the total discount applied to customer orders.
+      This metric helps evaluate promotional strategies, pricing effectiveness,
+      and the impact of discounts on sales and overall business profitability.
 
   type: measure
 

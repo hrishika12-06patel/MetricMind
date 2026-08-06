@@ -3,8 +3,10 @@ metric:
   display_name: Total Profit
 
   description: >
-    Total Profit represents the net revenue remaining after
-    subtracting product cost.
+      Represents the profit earned after deducting costs from total revenue.
+      This metric helps evaluate business profitability, financial performance,
+      and identifies the products, categories, and regions contributing the
+      highest profit.
 
   type: measure
 

@@ -4,9 +4,10 @@ entity:
   display_name: Order
 
   description: >
-    Represents a customer purchase transaction. Orders connect customers,
-    products, shipping information, and business metrics such as sales,
-    profit, quantity, and discounts.
+      Represents the total number of customer orders processed by the business.
+      This metric helps monitor customer purchasing activity, sales trends,
+      and operational performance across different regions, categories,
+      and customer segments.
 
   source:
     table: orders
