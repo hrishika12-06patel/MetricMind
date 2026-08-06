@@ -6,6 +6,18 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
+
+  const totalSales = orders.reduce(
+  (sum, order) => sum + Number(order["Sales"] || 0),
+  0
+);
+
+const totalProfit = orders.reduce(
+  (sum, order) => sum + Number(order["Profit"] || 0),
+  0
+);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -16,6 +28,7 @@ export default function OrdersPage() {
 
         if (data.success) {
           setOrders(data.data);
+          setFilteredOrders(data.data);
         } else {
           setError(data.message);
         }
@@ -28,6 +41,16 @@ export default function OrdersPage() {
 
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+  const filtered = orders.filter((order) =>
+    order["Customer.Name"]
+      ?.toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  setFilteredOrders(filtered);
+}, [search, orders]);
 
   if (loading) {
     return <h2 style={{ padding: "40px" }}>
@@ -51,7 +74,7 @@ export default function OrdersPage() {
   }
 
   if (orders.length === 0) {
-    return <h2 style={{ padding: "40px" }}>No Orders Found.</h2>;
+    return <h2 style={{ padding: "40px", color: "#1F2937" }}>No Orders Found.</h2>;
   }
 
   return (
@@ -59,6 +82,7 @@ export default function OrdersPage() {
       background: "#F8FAFC",
       minHeight: "100vh",
       fontFamily: "Arial, sans-serif",
+      color: "#1F2937",
     }}
     >
     
@@ -104,6 +128,8 @@ export default function OrdersPage() {
   <input
     type="text"
     placeholder="🔍 Search Orders..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
     style={{
       padding: "10px",
       width: "300px",
@@ -133,10 +159,26 @@ export default function OrdersPage() {
       borderRadius: "12px",
       boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
       flex: 1,
+      color: "#1F2937",
     }}
   >
-    <h3>Total Orders</h3>
-    <h2>{orders.length}</h2>
+    <h3
+      style={{
+        color: "#6B7280",
+        marginBottom: "10px",
+      }}
+    >
+      Total Orders
+    </h3>
+    <h2
+      style={{
+        color: "#0F766E",
+        fontSize: "30px",
+        margin: 0,
+      }}
+    >
+      {orders.length}
+    </h2>
   </div>
 
   <div
@@ -146,10 +188,26 @@ export default function OrdersPage() {
       borderRadius: "12px",
       boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
       flex: 1,
+      color: "#1F2937",
     }}
   >
-    <h3>Total Sales</h3>
-    <h2>₹ --</h2>
+    <h3
+      style={{
+        color: "#6B7280",
+        marginBottom: "10px",
+      }}
+    >
+      Total Sales
+    </h3>
+    <h2
+      style={{
+        color: "#0F766E",
+        fontSize: "30px",
+        margin: 0,
+      }}
+    >
+      ₹ {totalSales.toFixed(2)}
+    </h2>
   </div>
 
   <div
@@ -159,10 +217,26 @@ export default function OrdersPage() {
       borderRadius: "12px",
       boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
       flex: 1,
+      color: "#1F2937",
     }}
   >
-    <h3>Total Profit</h3>
-    <h2>₹ --</h2>
+    <h3
+      style={{
+        color: "#6B7280",
+        marginBottom: "10px",
+      }}
+    >
+      Total Profit
+    </h3>
+    <h2
+      style={{
+        color: "#0F766E",
+        fontSize: "30px",
+        margin: 0,
+      }}
+    >
+      ₹ {totalProfit.toFixed(2)}
+    </h2>
   </div>
 </div>
 
@@ -179,6 +253,17 @@ export default function OrdersPage() {
             overflowX: "auto",
           }}
         >
+          {filteredOrders.length === 0 ? (
+  <p
+    style={{
+      textAlign: "center",
+      color: "#6B7280",
+      padding: "20px",
+    }}
+  >
+    No matching orders found.
+  </p>
+) : (
           <table
             style={{
               width: "100%",
@@ -203,8 +288,17 @@ export default function OrdersPage() {
             </thead>
 
             <tbody>
-              {orders.map((order: any, index: number) => (
-                <tr key={index}>
+              {filteredOrders.map((order: any, index: number) => (
+                <tr 
+                  key={index}
+                  style={{
+                    backgroundColor:
+                    index % 2 === 0 
+                    ? "#FFFFFF" 
+                    : "#F8FAFC",
+                    cursor: "pointer",
+                  }}
+                >
                   <td 
                     style={{
                      padding: "12px",
@@ -253,20 +347,23 @@ export default function OrdersPage() {
                       fontWeight: "bold" 
                     }}
                   >
-                    {order["Sales"]}
+                    ₹ {Number(order["Sales"]).toFixed(2)}
                   </td>
                   <td 
                     style={{ 
                       padding: "12px", 
-                      textAlign: "center" 
+                      textAlign: "center",
+                      color: "#2563EB",
+                      fontWeight: "bold",
                     }}
                   >
-                    {order["Profit"]}
+                    ₹ {Number(order["Profit"]).toFixed(2)}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>
