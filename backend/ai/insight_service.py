@@ -1,5 +1,6 @@
 import json
-from typing import Union, List, Dict, Any
+import time
+from typing import Union, List, Dict, Any, Optional
 
 try:
     from ai.chains import summary_chain, order_summary_chain
@@ -29,11 +30,26 @@ class AIInsightService:
             return str(data)
 
     @classmethod
+    def _invoke_with_retry(cls, chain: Any, input_data: Dict[str, Any], max_retries: int = 3) -> str:
+        """
+        Invokes a LangChain chain with retry logic for transient API issues.
+        """
+        last_error = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                return chain.invoke(input_data)
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries:
+                    time.sleep(1.5 * attempt)
+        raise last_error
+
+    @classmethod
     def generate_summary(
         cls,
         data: Union[str, List[Any], Dict[str, Any]],
         data_type: str = "sales",
-        question: str | None = None
+        question: Optional[str] = None
     ) -> str:
         """
         Generates an AI summary for business data.
@@ -49,7 +65,8 @@ class AIInsightService:
         formatted_data = cls._format_data(data)
         query_prompt = question or f"Summarize key insights, metrics, trends, and recommendations for this {data_type} dataset."
 
-        response = summary_chain.invoke(
+        return cls._invoke_with_retry(
+            summary_chain,
             {
                 "question": query_prompt,
                 "data_type": data_type,
@@ -57,14 +74,12 @@ class AIInsightService:
             }
         )
 
-        return response
-
     @classmethod
     def summarize_dataset(
         cls,
         data: Union[str, List[Any], Dict[str, Any]],
         data_type: str = "sales",
-        question: str | None = None
+        question: Optional[str] = None
     ) -> str:
         """
         Alias for generate_summary to ensure backward compatibility across backend code and tests.
@@ -87,14 +102,90 @@ class AIInsightService:
         """
         formatted_orders = cls._format_data(orders_data)
 
-        response = order_summary_chain.invoke(
+        return cls._invoke_with_retry(
+            order_summary_chain,
             {
                 "dataset": formatted_orders
             }
         )
 
-        return response
+    @classmethod
+    def summarize_db_orders(
+        cls,
+        db_session: Any,
+        region: Optional[str] = None,
+        category: Optional[str] = None,
+        segment: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Fetches live order records from SQLite database, computes aggregated metrics,
+        and generates an AI business summary using LangChain.
+
+        Args:
+            db_session: SQLAlchemy Session instance
+            region (str, optional): Region filter
+            category (str, optional): Category filter
+            segment (str, optional): Segment filter
+
+        Returns:
+            dict: Aggregated metrics & AI summary markdown
+        """
+        try:
+            from database import get_all_orders
+        except ImportError:
+            from backend.database import get_all_orders
+
+        orders = get_all_orders(db_session)
+
+        # Apply optional filters
+        if region:
+            orders = [o for o in orders if str(o.get("Region", "")).lower() == region.lower()]
+        if category:
+            orders = [o for o in orders if str(o.get("Category", "")).lower() == category.lower()]
+        if segment:
+            orders = [o for o in orders if str(o.get("Segment", "")).lower() == segment.lower()]
+
+        total_orders = len(orders)
+        total_sales = sum(float(o.get("Sales", 0) or 0) for o in orders)
+        total_profit = sum(float(o.get("Profit", 0) or 0) for o in orders)
+        avg_order_value = total_sales / total_orders if total_orders > 0 else 0.0
+
+        # Category performance breakdown
+        cat_breakdown = {}
+        for o in orders:
+            cat = str(o.get("Category", "Unknown"))
+            s = float(o.get("Sales", 0) or 0)
+            p = float(o.get("Profit", 0) or 0)
+            if cat not in cat_breakdown:
+                cat_breakdown[cat] = {"sales": 0.0, "profit": 0.0, "count": 0}
+            cat_breakdown[cat]["sales"] += s
+            cat_breakdown[cat]["profit"] += p
+            cat_breakdown[cat]["count"] += 1
+
+        top_category = max(cat_breakdown.items(), key=lambda x: x[1]["sales"])[0] if cat_breakdown else "N/A"
+
+        metrics_summary = {
+            "filters_applied": {
+                "region": region,
+                "category": category,
+                "segment": segment
+            },
+            "total_orders": total_orders,
+            "total_sales": round(total_sales, 2),
+            "total_profit": round(total_profit, 2),
+            "average_order_value": round(avg_order_value, 2),
+            "top_category_by_sales": top_category,
+            "category_performance": cat_breakdown
+        }
+
+        ai_summary = cls.summarize_orders(metrics_summary)
+
+        return {
+            "metrics": metrics_summary,
+            "ai_summary": ai_summary
+        }
 
 
 # Class alias for convenient importing
-InsightService = AIInsightService
+InsightService = AIInsightService
+

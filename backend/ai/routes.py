@@ -1,11 +1,17 @@
 from typing import Union, List, Dict, Any, Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 try:
     from ai.insight_service import AIInsightService, InsightService
 except ImportError:
     from insight_service import AIInsightService, InsightService
+
+try:
+    from database import get_db
+except ImportError:
+    from backend.database import get_db
 
 router = APIRouter(
     prefix="/ai",
@@ -110,4 +116,41 @@ def summarize_orders(request: AIOrdersRequest):
         raise HTTPException(
             status_code=500,
             detail=f"AI Service Error: {str(e)}"
-        )
+        )
+
+
+@router.get(
+    "/summarize-live-orders",
+    summary="Generate AI Summary from Live Database Orders",
+    description="Fetches live orders from the database with optional filters, computes aggregated metrics, and generates AI business insights."
+)
+def summarize_live_orders(
+    region: Optional[str] = Query(default=None, description="Optional region filter (e.g., East, West, South, Central)"),
+    category: Optional[str] = Query(default=None, description="Optional category filter (e.g., Technology, Furniture, Office Supplies)"),
+    segment: Optional[str] = Query(default=None, description="Optional segment filter (e.g., Consumer, Corporate, Home Office)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Generate AI summary from live database orders.
+    """
+    try:
+        result = AIInsightService.summarize_db_orders(
+            db_session=db,
+            region=region,
+            category=category,
+            segment=segment
+        )
+
+        return {
+            "success": True,
+            "message": "Live database order insights generated successfully.",
+            "metrics": result["metrics"],
+            "summary": result["ai_summary"]
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI Live Order Service Error: {str(e)}"
+        )
+

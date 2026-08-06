@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **MetricMind AI Module** leverages **LangChain** and **Google Gemini LLM** to analyze sales data and order metrics, returning structured business insights, executive summaries, trends, risks, and actionable recommendations.
+The **MetricMind AI Module** leverages **LangChain Expression Language (LCEL)** and **Google Gemini LLM** (`ChatGoogleGenerativeAI`) to analyze sales data, database order metrics, and business data streams, returning structured business insights, executive summaries, trends, risks, and actionable recommendations.
 
 ---
 
@@ -17,8 +17,8 @@ backend/
     ├── prompt_templates.py   # Business Intelligence & Order prompt templates
     ├── chains.py             # LangChain LCEL (LangChain Expression Language) chains
     ├── insight_service.py    # Service encapsulation (AIInsightService & InsightService)
-    ├── routes.py             # FastAPI API endpoints (/ai/summarize, /ai/summarize-orders)
-    └── test_ai.py            # AI module verification script
+    ├── routes.py             # FastAPI API endpoints (/ai/summarize, /ai/summarize-orders, /ai/summarize-live-orders)
+    └── test_ai.py            # Automated AI module verification script (3 tests)
 ```
 
 ---
@@ -36,6 +36,7 @@ pip install python-dotenv
 pip install fastapi
 pip install uvicorn
 pip install pydantic
+pip install sqlalchemy
 ```
 
 ---
@@ -46,7 +47,7 @@ Create or update the `.env` file in the project root (`MetricMind/.env`):
 
 ```env
 GOOGLE_API_KEY=your_google_gemini_api_key_here
-MODEL_NAME=gemini-1.5-flash
+MODEL_NAME=gemini-flash-latest
 ```
 
 ### How to Get a Google Gemini API Key:
@@ -59,20 +60,20 @@ MODEL_NAME=gemini-1.5-flash
 
 ## Module Functionality & Usage
 
-### 1. Service Layer (`AIInsightService` / `InsightService`)
+### Service Layer (`AIInsightService` / `InsightService`)
 
-The AI logic is encapsulated in `backend/ai/insight_service.py` and can be imported directly anywhere in the backend:
+The AI logic is encapsulated in `backend/ai/insight_service.py` and can be imported directly anywhere across the backend:
 
 ```python
 from ai.insight_service import AIInsightService
 
-# Summarize sales data (accepts string, list, or dict)
+# 1. Summarize sales data text or dict
 summary = AIInsightService.generate_summary(
     data="Sales: $100,000, Profit: $20,000",
     data_type="sales"
 )
 
-# Target order metrics analysis
+# 2. Targeted order metrics analysis
 order_insights = AIInsightService.summarize_orders(
     orders_data={
         "total_orders": 1250,
@@ -80,6 +81,13 @@ order_insights = AIInsightService.summarize_orders(
         "total_profit": 48200.50,
         "top_category": "Technology"
     }
+)
+
+# 3. Summarize live SQLite database order metrics directly
+db_insights = AIInsightService.summarize_db_orders(
+    db_session=db,
+    region="East",
+    category="Technology"
 )
 ```
 
@@ -90,8 +98,8 @@ order_insights = AIInsightService.summarize_orders(
 To start the FastAPI server with AI routes enabled:
 
 ```bash
-cd backend
-uvicorn app:app --reload
+# Using Python virtual environment (.venv)
+.\.venv\Scripts\python.exe -m uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The server runs locally at: `http://127.0.0.1:8000`  
@@ -158,13 +166,51 @@ Generates business insights specifically tailored for order dataset records or a
 
 ---
 
+### 3. `GET /ai/summarize-live-orders`
+Queries live orders directly from the SQLite database, computes aggregated key metrics (total orders, sales, profit, AOV, top category), and passes them to Gemini for business insight generation.
+
+**Query Parameters:**
+- `region` (optional): Filter orders by region (`East`, `West`, `South`, `Central`)
+- `category` (optional): Filter orders by category (`Technology`, `Furniture`, `Office Supplies`)
+- `segment` (optional): Filter orders by segment (`Consumer`, `Corporate`, `Home Office`)
+
+**Example Request:**
+`GET /ai/summarize-live-orders?region=East`
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Live database order insights generated successfully.",
+  "metrics": {
+    "filters_applied": {
+      "region": "East",
+      "category": null,
+      "segment": null
+    },
+    "total_orders": 2848,
+    "total_sales": 678781.24,
+    "total_profit": 91522.78,
+    "average_order_value": 238.34,
+    "top_category_by_sales": "Technology",
+    "category_performance": {
+      "Furniture": {"sales": 208291.13, "profit": 3061.27, "count": 601},
+      "Office Supplies": {"sales": 204562.91, "profit": 41024.1, "count": 1716},
+      "Technology": {"sales": 265927.2, "profit": 47437.41, "count": 531}
+    }
+  },
+  "summary": "### 1. Order Overview\n* **Total Volume:** 2,848 orders\n* **Total Sales:** $678,781.24..."
+}
+```
+
+---
+
 ## Running AI Verification Tests
 
-Run the test script to verify that the LangChain pipeline and Gemini API key are operational:
+Run the comprehensive test script to verify that the LangChain pipeline, Gemini API key, and SQLite database summarization helper are operational:
 
 ```bash
-cd backend
-python ai/test_ai.py
+.\.venv\Scripts\python.exe backend/ai/test_ai.py
 ```
 
 Expected Output:
@@ -179,6 +225,9 @@ TEST 1: Sales Data Text Summary
 TEST 2: Structured Orders Summary
 [SUCCESS] Test 2 passed!
 
+TEST 3: Live Database Orders AI Summary
+[SUCCESS] Test 3 passed!
+
 ============================================================
 ALL AI TESTS PASSED SUCCESSFULLY! AI WORKFLOW OPERATIONAL.
 ============================================================
@@ -188,6 +237,7 @@ ALL AI TESTS PASSED SUCCESSFULLY! AI WORKFLOW OPERATIONAL.
 
 ## Notes & Troubleshooting
 
-- **Module Import Errors**: Run Python commands from the `backend/` directory or use `python -m ai.test_ai`.
+- **Virtual Environment**: Use `.\.venv\Scripts\python.exe` when executing scripts or backend servers to ensure all required packages (`langchain-core`, `langchain-google-genai`) are available.
 - **API Key Missing**: Ensure `.env` is located at `MetricMind/.env` and contains a valid `GOOGLE_API_KEY`.
-- **Rate Limits / Quota Errors**: The default model is `gemini-1.5-flash`. You can change `MODEL_NAME` in `.env` to `gemini-2.5-flash` or `gemini-2.0-flash` if desired.
+- **Retry Logic**: `AIInsightService` includes built-in retry handling for transient Google API network resets.
+

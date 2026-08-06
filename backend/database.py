@@ -38,9 +38,9 @@ def close_session(db):
     """Close the given database session."""
     try:
         db.close()
-        print("✅ Session closed.")
+        print("[OK] Session closed.")
     except Exception as e:
-        print(f"❌ Error closing session: {e}")
+        print(f"[ERROR] Error closing session: {e}")
 
 # ─── Connection Test ──────────────────────────────────────
 
@@ -49,9 +49,9 @@ def test_connection():
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        print("✅ Database connected successfully!")
+        print("[OK] Database connected successfully!")
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
+        print(f"[ERROR] Connection failed: {e}")
 
 # ─── Index Management ─────────────────────────────────────
 
@@ -69,13 +69,13 @@ def create_indexes(engine):
                 try:
                     conn.execute(text(idx))
                     name = idx.split("idx_")[1].split(" ")[0]
-                    print(f"✅ Index created: {name}")
+                    print(f"[OK] Index created: {name}")
                 except Exception as e:
-                    print(f"⚠️ Index skipped: {e}")
+                    print(f"[WARNING] Index skipped: {e}")
             conn.commit()
-        print("✅ All indexes processed!")
+        print("[OK] All indexes processed!")
     except Exception as e:
-        print(f"❌ Error creating indexes: {e}")
+        print(f"[ERROR] Error creating indexes: {e}")
 
 # ─── Query Functions ──────────────────────────────────────
 
@@ -86,7 +86,7 @@ def get_all_orders(db):
         rows = result.fetchall()
         return [dict(row._mapping) for row in rows]
     except Exception as e:
-        print(f"❌ Error fetching orders: {e}")
+        print(f"[ERROR] Error fetching orders: {e}")
         return []
 
 def count_total_orders(db):
@@ -96,7 +96,7 @@ def count_total_orders(db):
         row = result.fetchone()
         return row._mapping["total"] if row else 0
     except Exception as e:
-        print(f"❌ Error counting orders: {e}")
+        print(f"[ERROR] Error counting orders: {e}")
         return 0
 
 def calculate_total_sales(db):
@@ -106,7 +106,7 @@ def calculate_total_sales(db):
         row = result.fetchone()
         return row._mapping["total_sales"] or 0
     except Exception as e:
-        print(f"❌ Error calculating sales: {e}")
+        print(f"[ERROR] Error calculating sales: {e}")
         return 0
 
 def calculate_total_profit(db):
@@ -116,5 +116,5 @@ def calculate_total_profit(db):
         row = result.fetchone()
         return row._mapping["total_profit"] or 0
     except Exception as e:
-        print(f"❌ Error calculating profit: {e}")
-        return 0
+        print(f"[ERROR] Error calculating profit: {e}")
+        return 0

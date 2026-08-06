@@ -21,6 +21,11 @@ try:
 except ImportError:
     from insight_service import AIInsightService, InsightService
 
+try:
+    from database import open_session, close_session
+except ImportError:
+    from backend.database import open_session, close_session
+
 
 sample_sales_text = """
 Global Superstore Sales Data - Q3 Report
@@ -84,6 +89,30 @@ def test_orders_structured_summary():
         return False
 
 
+def test_live_db_orders_summary():
+    print("\n" + "=" * 60)
+    print("TEST 3: Live Database Orders AI Summary")
+    print("=" * 60)
+
+    session = None
+    try:
+        session = open_session()
+        result = AIInsightService.summarize_db_orders(db_session=session, region="East")
+        print("\nCOMPUTED METRICS FROM DB:")
+        print(result["metrics"])
+        print("\nAI RESPONSE (Live DB Order Insights):\n")
+        print(result["ai_summary"])
+        print("\n[SUCCESS] Test 3 passed!")
+        return True
+    except Exception as e:
+        print("\n[FAILED] Test 3 failed with error:")
+        print(e)
+        return False
+    finally:
+        if session:
+            close_session(session)
+
+
 def main():
     print("=" * 60)
     print("MetricMind AI Integration Test Suite")
@@ -91,9 +120,10 @@ def main():
 
     t1_success = test_sales_text_summary()
     t2_success = test_orders_structured_summary()
+    t3_success = test_live_db_orders_summary()
 
     print("\n" + "=" * 60)
-    if t1_success and t2_success:
+    if t1_success and t2_success and t3_success:
         print("ALL AI TESTS PASSED SUCCESSFULLY! AI WORKFLOW OPERATIONAL.")
     else:
         print("SOME AI TESTS FAILED. PLEASE CHECK LOGS ABOVE.")
@@ -101,4 +131,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()
+
