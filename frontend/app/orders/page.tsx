@@ -61,7 +61,7 @@ const totalProfit = orders.reduce(
         alignItems: "center",
         height: "100vh",
         fontSize: "24px",
-        color: "#0F766E",
+        color: "#794d6c",
         }}
       >
          Loading Orders...
@@ -70,7 +70,7 @@ const totalProfit = orders.reduce(
   }
 
   if (error) {
-    return <h2 style={{ padding: "40px", color: "red" }}>{error}</h2>;
+    return <h2 style={{ padding: "40px", color: "#DC2626" }}>{error}</h2>;
   }
 
   if (orders.length === 0) {
@@ -79,7 +79,7 @@ const totalProfit = orders.reduce(
 
   return (
     <div style={{ padding: "40px",
-      background: "#F8FAFC",
+      background: "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
       minHeight: "100vh",
       fontFamily: "Arial, sans-serif",
       color: "#1F2937",
@@ -94,7 +94,7 @@ const totalProfit = orders.reduce(
   <h1
     style={{
       fontSize: "36px",
-      color: "#0F766E",
+      color: "#52465A",
       marginBottom: "8px",
     }}
   >
@@ -103,7 +103,7 @@ const totalProfit = orders.reduce(
 
   <p
     style={{
-      color: "#6B7280",
+      color: "#64748B",
       fontSize: "16px",
     }}
   >
@@ -134,15 +134,51 @@ const totalProfit = orders.reduce(
       padding: "10px",
       width: "300px",
       borderRadius: "8px",
-      border: "1px solid #ccc",
+      border: "1px solid #E5E7EB",
     }}
   />
 
-  <button>Search</button>
+  <button
+    style={{
+      background:"#794d6c",
+      color:"white",
+      border:"none",
+      padding:"10px 18px",
+      borderRadius:"8px",
+      cursor:"pointer",
+    fontWeight:"600"
+    }}
+  >
+    Search
+  </button>
 
-  <button>Filter</button>
+  <button
+    style={{
+      background:"#794d6c",
+      color:"white",
+      border:"none",
+      padding:"10px 18px",
+      borderRadius:"8px",
+      cursor:"pointer",
+      fontWeight:"600"
+    }}
+  >
+    Filter
+  </button>
 
-  <button>Sort</button>
+  <button
+    style={{
+      background:"#794d6c",
+      color:"white",
+      border:"none",
+      padding:"10px 18px",
+      borderRadius:"8px",
+      cursor:"pointer",
+      fontWeight:"600"
+    }}
+  >
+    Sort
+  </button>
 </div>
 
 <div
@@ -164,17 +200,18 @@ const totalProfit = orders.reduce(
   >
     <h3
       style={{
-        color: "#6B7280",
-        marginBottom: "10px",
+        color: "#404e62",
+        marginBottom: "8px",
       }}
     >
       Total Orders
     </h3>
     <h2
       style={{
-        color: "#0F766E",
+        color: "#794d6c",
         fontSize: "30px",
         margin: 0,
+        fontWeight:"700",
       }}
     >
       {orders.length}
@@ -201,7 +238,7 @@ const totalProfit = orders.reduce(
     </h3>
     <h2
       style={{
-        color: "#0F766E",
+        color: "#794d6c",
         fontSize: "30px",
         margin: 0,
       }}
@@ -230,7 +267,7 @@ const totalProfit = orders.reduce(
     </h3>
     <h2
       style={{
-        color: "#0F766E",
+        color: "#794d6c",
         fontSize: "30px",
         margin: 0,
       }}
@@ -257,7 +294,7 @@ const totalProfit = orders.reduce(
   <p
     style={{
       textAlign: "center",
-      color: "#6B7280",
+      color: "#404e62",
       padding: "20px",
     }}
   >
@@ -272,7 +309,7 @@ const totalProfit = orders.reduce(
           >
             <thead
               style={{
-                background: "#0F766E",
+                background: "#794d6c",
                 color: "white",
                 textAlign: "left",
               }}>
@@ -343,7 +380,7 @@ const totalProfit = orders.reduce(
                     style={{ 
                       padding: "12px", 
                       textAlign: "center" , 
-                      color: "#059669", 
+                      color: "#794d6c", 
                       fontWeight: "bold" 
                     }}
                   >
@@ -353,7 +390,7 @@ const totalProfit = orders.reduce(
                     style={{ 
                       padding: "12px", 
                       textAlign: "center",
-                      color: "#2563EB",
+                      color: "#794d6c",
                       fontWeight: "bold",
                     }}
                   >
