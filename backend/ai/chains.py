@@ -1,23 +1,22 @@
+from functools import lru_cache
+
 from langchain_core.output_parsers import StrOutputParser
 
 try:
     from ai.llm_factory import get_llm
     from ai.prompt_templates import DATASET_SUMMARY_PROMPT, ORDER_ANALYSIS_PROMPT
 except ImportError:
-    from llm_factory import get_llm
-    from prompt_templates import DATASET_SUMMARY_PROMPT, ORDER_ANALYSIS_PROMPT
+    from .llm_factory import get_llm
+    from .prompt_templates import DATASET_SUMMARY_PROMPT, ORDER_ANALYSIS_PROMPT
 
 
-llm = get_llm()
+@lru_cache(maxsize=1)
+def get_summary_chain():
+    """Build the reusable LCEL chain for general business summaries."""
+    return DATASET_SUMMARY_PROMPT | get_llm() | StrOutputParser()
 
-summary_chain = (
-    DATASET_SUMMARY_PROMPT
-    | llm
-    | StrOutputParser()
-)
 
-order_summary_chain = (
-    ORDER_ANALYSIS_PROMPT
-    | llm
-    | StrOutputParser()
-)
+@lru_cache(maxsize=1)
+def get_order_summary_chain():
+    """Build the reusable LCEL chain for order-specific summaries."""
+    return ORDER_ANALYSIS_PROMPT | get_llm() | StrOutputParser()

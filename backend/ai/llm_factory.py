@@ -1,9 +1,9 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 try:
-    from ai.config import GOOGLE_API_KEY, MODEL_NAME
+    from ai.config import AI_REQUEST_TIMEOUT_SECONDS, MODEL_NAME, get_google_api_key
 except ImportError:
-    from config import GOOGLE_API_KEY, MODEL_NAME
+    from .config import AI_REQUEST_TIMEOUT_SECONDS, MODEL_NAME, get_google_api_key
 
 
 def get_llm(model_name: str | None = None, temperature: float = 0.2):
@@ -20,6 +20,10 @@ def get_llm(model_name: str | None = None, temperature: float = 0.2):
     target_model = model_name or MODEL_NAME
     return ChatGoogleGenerativeAI(
         model=target_model,
-        google_api_key=GOOGLE_API_KEY,
+        google_api_key=get_google_api_key(),
         temperature=temperature,
-    )
+        timeout=AI_REQUEST_TIMEOUT_SECONDS,
+        # Retry behavior is owned by AIInsightService so every endpoint has
+        # consistent retry and error handling.
+        max_retries=0,
+    )
