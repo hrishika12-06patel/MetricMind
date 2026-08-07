@@ -1,3 +1,13 @@
+import sys
+from pathlib import Path
+
+# Add backend and project root directories to sys.path
+BASE_DIR = Path(__file__).resolve().parent
+ROOT_DIR = BASE_DIR.parent
+for d in [str(BASE_DIR), str(ROOT_DIR)]:
+    if d not in sys.path:
+        sys.path.insert(0, d)
+
 from contextlib import asynccontextmanager
 
 from ai.routes import router as ai_router

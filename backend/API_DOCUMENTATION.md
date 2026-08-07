@@ -454,113 +454,209 @@ GET /orders?sort_by=Sales&order=desc
 ---
 ---
 
-# 8. AI Sales Dataset Summary
+# 10. AI Analytics & Business Insights APIs
 
-## Endpoint
+## 10.1 Primary AI Summary Endpoint
 
-```
-POST /ai/summarize
+### Endpoint
+
+```http
+POST /ai/summary
 ```
 
 ### Purpose
 
-Generates an AI-powered business summary and insights for a given sales dataset using **LangChain** integrated with the **Google Gemini** Large Language Model (LLM).
+Generates a structured AI business intelligence summary from sales, financial, or order datasets using **LangChain** and **Google Gemini LLM**. Accepts raw text, structured JSON records, or aggregated metric dictionaries.
 
-This endpoint analyzes the dataset and provides:
+### Request Body (`AISummaryRequest`)
 
-- Executive Summary
-- Key Business Insights
-- Trends
-- Risks
-- Business Recommendations
-
----
-
-### Request Method
-
-```
-POST
-```
-
----
-
-### Request Body
-
-| Field | Type | Description |
-|--------|------|-------------|
-| dataset | String | Sales dataset to be analyzed by the AI model |
-
----
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| dataset | String \| Object \| Array | Yes | Sales or order data to summarize |
+| data_type | String | No (Default: "sales") | Type of dataset (`sales`, `orders`, `financial`) |
+| question | String | No | Custom prompt objective or question |
 
 ### Sample Request
+
+```http
+POST /ai/summary
+Content-Type: application/json
+
+{
+    "dataset": {
+        "total_orders": 1250,
+        "total_sales": 345000.75,
+        "total_profit": 48200.50,
+        "top_category": "Technology",
+        "underperforming_category": "Furniture"
+    },
+    "data_type": "orders",
+    "question": "Provide key executive summary and actionable recommendations."
+}
+```
+
+### Sample Response (`AISummaryResponse`)
+
+```json
+{
+    "success": true,
+    "message": "AI summary generated successfully.",
+    "summary": "# Business Intelligence Report: MetricMind Orders Analysis\n\n## 1. Executive Summary\nDuring the evaluated period, MetricMind generated **$345,000.75** in total sales...",
+    "data": {
+        "data_type": "orders",
+        "summary": "# Business Intelligence Report: MetricMind Orders Analysis...",
+        "question": "Provide key executive summary and actionable recommendations."
+    }
+}
+```
+
+---
+
+## 10.2 AI Summary Endpoint (Alias)
+
+### Endpoint
 
 ```http
 POST /ai/summarize
 ```
 
-```json
-{
-    "dataset": "Sales: 120, 340, 280, 560, 410\nProfit: 20, 55, 45, 120, 70"
-}
-```
+### Purpose
+
+Alias endpoint for `/ai/summary` to ensure backward compatibility for legacy clients. Same request/response schema as `POST /ai/summary`.
 
 ---
 
-### Example JSON Response
+## 10.3 Order Insights Endpoint
+
+### Endpoint
+
+```http
+POST /ai/summarize-orders
+```
+
+### Purpose
+
+Generates targeted AI business insights specifically formatted for order dataset records or aggregated order metrics.
+
+### Request Body (`AIOrdersRequest`)
+
+```json
+{
+    "orders": {
+        "total_orders": 500,
+        "total_sales": 125000.50,
+        "total_profit": 18250.00,
+        "top_category": "Technology"
+    }
+}
+```
+
+### Sample Response (`AIOrdersResponse`)
 
 ```json
 {
     "success": true,
-    "summary": "Executive Summary\n\nThe analyzed dataset reflects healthy profitability with an overall profit margin of 18.13%. Larger transactions contribute significantly to revenue and profit. Recommendations include increasing average order value, optimizing lower-value transactions, and expanding data analysis using customer and product information."
+    "message": "Order insights generated successfully.",
+    "summary": "### 1. Order Overview\n* **Total Volume:** 500 orders...",
+    "data": {
+        "data_type": "orders",
+        "summary": "### 1. Order Overview\n* **Total Volume:** 500 orders..."
+    }
 }
 ```
 
 ---
 
-### Possible Error Responses
+## 10.4 Live Database Orders AI Summary
 
-#### Invalid Request
+### Endpoint
 
-```json
-{
-    "detail": "dataset field is required."
-}
+```http
+GET /ai/summarize-live-orders
 ```
 
-#### AI Service Error
+### Purpose
 
-```json
-{
-    "detail": "Unable to generate AI insights."
-}
+Queries live SQLite order records with optional filtering, calculates aggregated metrics, and returns an AI business summary.
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| region | String | Optional region filter (`East`, `West`, `South`, `Central`) |
+| category | String | Optional category filter (`Technology`, `Furniture`, `Office Supplies`) |
+| segment | String | Optional segment filter (`Consumer`, `Corporate`, `Home Office`) |
+
+### Sample Request
+
+```http
+GET /ai/summarize-live-orders?region=East
 ```
 
-#### Internal Server Error
+### Sample Response (`AILiveOrdersResponse`)
 
 ```json
 {
-    "detail": "Internal Server Error"
+    "success": true,
+    "message": "Live database order insights generated successfully.",
+    "metrics": {
+        "filters_applied": {
+            "region": "East",
+            "category": null,
+            "segment": null
+        },
+        "total_orders": 2848,
+        "total_sales": 678834.0,
+        "total_profit": 91522.78,
+        "average_order_value": 238.35,
+        "top_category_by_sales": "Technology",
+        "category_performance": {
+            "Office Supplies": {"sales": 205549.0, "profit": 41014.58, "count": 1712},
+            "Technology": {"sales": 264994.0, "profit": 47462.04, "count": 535},
+            "Furniture": {"sales": 208291.0, "profit": 3046.17, "count": 601}
+        }
+    },
+    "summary": "### 1. Order Overview\n* **Total Volume:** 2,848 orders..."
 }
 ```
 
 ---
 
-### Technologies Used
+### AI Module Error Responses
 
-- FastAPI
-- LangChain
-- Google Gemini API
-- Prompt Templates
-- Service Layer Architecture
+#### Bad Request / Input Validation Error (HTTP 400 or HTTP 422)
 
----
+```json
+{
+    "detail": [
+        {
+            "type": "value_error",
+            "loc": ["body", "dataset"],
+            "msg": "Value error, Dataset input string cannot be empty or whitespace."
+        }
+    ]
+}
+```
 
-### Notes
+#### AI configuration error (HTTP 503)
 
-- A valid Google Gemini API key must be configured in the `.env` file.
-- AI responses are generated dynamically and may vary slightly for the same dataset.
-- The endpoint is intended for business intelligence and sales analytics use cases.
-- The LangChain workflow uses reusable prompt templates and a modular service architecture for maintainability.
+Returned when `GOOGLE_API_KEY` has not been configured. Non-AI endpoints remain available.
+
+```json
+{
+  "detail": "GOOGLE_API_KEY is not configured. Add it to the project .env file."
+}
+```
+
+#### Gemini provider error (HTTP 502)
+
+Returned after the configured provider has been retried and could not produce a summary.
+
+```json
+{
+    "detail": "The AI provider is temporarily unavailable. Please try again."
+}
+```
 ---
 
 # HTTP Response Codes
@@ -569,7 +665,9 @@ POST /ai/summarize
 |--------------|-------------|
 | 200 | Request Successful |
 | 422 | Validation Error |
-| 500 | Internal Server Error |
+| 500 | Unexpected server error |
+| 502 | Gemini provider unavailable or request timed out |
+| 503 | AI credentials are not configured |
 
 ---
 

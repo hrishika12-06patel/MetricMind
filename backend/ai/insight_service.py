@@ -1,11 +1,22 @@
 import json
+import logging
 import time
 from typing import Union, List, Dict, Any, Optional
 
 try:
-    from ai.chains import summary_chain, order_summary_chain
+    from ai.chains import get_order_summary_chain, get_summary_chain
+    from ai.config import AIConfigurationError
 except ImportError:
-    from chains import summary_chain, order_summary_chain
+    from .chains import get_order_summary_chain, get_summary_chain
+    from .config import AIConfigurationError
+
+
+logger = logging.getLogger(__name__)
+MAX_DATASET_CHARACTERS = 50_000
+
+
+class AIProviderError(RuntimeError):
+    """Raised when the configured LLM cannot produce a summary."""
 
 
 class AIInsightService:
@@ -20,14 +31,20 @@ class AIInsightService:
         Formats raw input data (string, list, or dict) into a readable string format.
         """
         if isinstance(data, str):
-            return data.strip()
+            formatted = data.strip()
         elif isinstance(data, (list, dict)):
             try:
-                return json.dumps(data, indent=2, default=str)
+                formatted = json.dumps(data, indent=2, default=str)
             except Exception:
-                return str(data)
+                formatted = str(data)
         else:
-            return str(data)
+            formatted = str(data)
+
+        if len(formatted) > MAX_DATASET_CHARACTERS:
+            raise ValueError(
+                f"Dataset is too large. Limit input to {MAX_DATASET_CHARACTERS:,} characters."
+            )
+        return formatted
 
     @classmethod
     def _invoke_with_retry(cls, chain: Any, input_data: Dict[str, Any], max_retries: int = 3) -> str:
@@ -38,11 +55,14 @@ class AIInsightService:
         for attempt in range(1, max_retries + 1):
             try:
                 return chain.invoke(input_data)
+            except AIConfigurationError:
+                raise
             except Exception as e:
                 last_error = e
                 if attempt < max_retries:
                     time.sleep(1.5 * attempt)
-        raise last_error
+        logger.exception("AI provider failed after %s attempt(s)", max_retries, exc_info=last_error)
+        raise AIProviderError("The AI provider could not generate a summary.") from last_error
 
     @classmethod
     def generate_summary(
@@ -66,7 +86,7 @@ class AIInsightService:
         query_prompt = question or f"Summarize key insights, metrics, trends, and recommendations for this {data_type} dataset."
 
         return cls._invoke_with_retry(
-            summary_chain,
+            get_summary_chain(),
             {
                 "question": query_prompt,
                 "data_type": data_type,
@@ -103,7 +123,7 @@ class AIInsightService:
         formatted_orders = cls._format_data(orders_data)
 
         return cls._invoke_with_retry(
-            order_summary_chain,
+            get_order_summary_chain(),
             {
                 "dataset": formatted_orders
             }
@@ -188,4 +208,4 @@ class AIInsightService:
 
 # Class alias for convenient importing
 InsightService = AIInsightService
-
+
