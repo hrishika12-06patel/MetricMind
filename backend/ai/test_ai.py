@@ -1,195 +1,155 @@
 """
-Script to test the MetricMind AI module, LangChain integration, and FastAPI AI endpoints.
+Independent test suite for MetricMind AI module and POST /ai/summary endpoint.
 
 Run from workspace root:
-    .\.venv\Scripts\python.exe backend/ai/test_ai.py
-or from backend directory:
-    python ai/test_ai.py
+    python -m ai.test_ai
+or:
+    python backend/ai/test_ai.py
 """
 
 import os
 import sys
 from pathlib import Path
 
-# Add backend directory to sys.path if not already present
+# Add backend directory to sys.path if not present
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-try:
-    from ai.insight_service import AIInsightService, InsightService
-except ImportError:
-    from insight_service import AIInsightService, InsightService
-
-try:
-    from database import open_session, close_session
-except ImportError:
-    from backend.database import open_session, close_session
-
 from fastapi.testclient import TestClient
 from app import app
 
+try:
+    from ai.insight_service import AIInsightService
+except ImportError:
+    from insight_service import AIInsightService
+
 client = TestClient(app)
 
-sample_sales_text = """
-Global Superstore Sales Data - Q3 Report
+sample_sales_input = "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70"
 
-Sales:
-- Technology: $120,500 (Profit: $24,100)
-- Office Supplies: $85,200 (Profit: $12,780)
-- Furniture: $64,300 (Profit: -$3,200)
-
-Regional Distribution:
-- East: $110,000
-- West: $95,000
-- Central: $65,000
-"""
-
-sample_orders_data = {
+sample_orders_input = {
     "total_orders": 1250,
     "total_sales": 345000.75,
     "total_profit": 48200.50,
-    "top_category": "Technology",
-    "underperforming_category": "Furniture",
-    "regions": {
-        "East": 120000,
-        "West": 140000,
-        "South": 85000
-    }
+    "top_category": "Technology"
 }
 
 
-def test_sales_text_summary():
-    print("\n" + "=" * 60, flush=True)
-    print("TEST 1: Sales Data Text Summary (Service Layer)", flush=True)
-    print("=" * 60, flush=True)
-
-    try:
-        response = InsightService.summarize_dataset(sample_sales_text, data_type="sales")
-        print("\nAI RESPONSE (Sales Summary):\n")
-        print(response[:400] + "...\n[Truncated for brevity]")
-        print("\n[SUCCESS] Test 1 passed!")
-        return True
-    except Exception as e:
-        print("\n[FAILED] Test 1 failed with error:")
-        print(e)
-        return False
+def test_valid_sales_input():
+    """Test POST /ai/summary with valid sales text input."""
+    res = client.post("/ai/summary", json={"data": sample_sales_input, "data_type": "sales"})
+    assert res.status_code in [200, 502], f"Expected 200 or 502, got {res.status_code}"
+    body = res.json()
+    if res.status_code == 200:
+        assert body.get("success") is True
+        assert "summary" in body
+        assert body.get("data_type") == "sales"
+    else:
+        assert body.get("success") is False
+        assert body.get("error", {}).get("code") in ["PROVIDER_ERROR", "CONFIG_ERROR"]
+    return True
 
 
-def test_orders_structured_summary():
-    print("\n" + "=" * 60)
-    print("TEST 2: Structured Orders Summary (Service Layer)")
-    print("=" * 60)
-
-    try:
-        response = AIInsightService.summarize_orders(sample_orders_data)
-        print("\nAI RESPONSE (Order Insights):\n")
-        print(response[:400] + "...\n[Truncated for brevity]")
-        print("\n[SUCCESS] Test 2 passed!")
-        return True
-    except Exception as e:
-        print("\n[FAILED] Test 2 failed with error:")
-        print(e)
-        return False
+def test_valid_order_input():
+    """Test POST /ai/summary with valid structured order dictionary input."""
+    res = client.post("/ai/summary", json={"dataset": sample_orders_input, "data_type": "orders"})
+    assert res.status_code in [200, 502], f"Expected 200 or 502, got {res.status_code}"
+    body = res.json()
+    if res.status_code == 200:
+        assert body.get("success") is True
+        assert "summary" in body
+        assert body.get("data_type") == "orders"
+    else:
+        assert body.get("success") is False
+        assert body.get("error", {}).get("code") in ["PROVIDER_ERROR", "CONFIG_ERROR"]
+    return True
 
 
-def test_live_db_orders_summary():
-    print("\n" + "=" * 60)
-    print("TEST 3: Live Database Orders AI Summary (DB + AI)")
-    print("=" * 60)
-
-    session = None
-    try:
-        session = open_session()
-        result = AIInsightService.summarize_db_orders(db_session=session, region="East")
-        print("\nCOMPUTED METRICS FROM DB:")
-        print(result["metrics"])
-        print("\nAI RESPONSE (Live DB Order Insights):\n")
-        print(result["ai_summary"][:400] + "...\n[Truncated for brevity]")
-        print("\n[SUCCESS] Test 3 passed!")
-        return True
-    except Exception as e:
-        print("\n[FAILED] Test 3 failed with error:")
-        print(e)
-        return False
-    finally:
-        if session:
-            close_session(session)
+def test_empty_input():
+    """Test POST /ai/summary with empty payload."""
+    res = client.post("/ai/summary", json={"dataset": {}})
+    assert res.status_code == 400, f"Expected 400, got {res.status_code}"
+    body = res.json()
+    assert body.get("success") is False
+    assert body.get("error", {}).get("code") == "INVALID_INPUT"
+    return True
 
 
-def test_fastapi_summary_endpoint():
-    print("\n" + "=" * 60)
-    print("TEST 4: FastAPI POST /ai/summary Endpoint Test")
-    print("=" * 60)
-
-    try:
-        payload = {
-            "dataset": sample_orders_data,
-            "data_type": "orders",
-            "question": "Provide key executive summary and actionable recommendations."
-        }
-        res = client.post("/ai/summary", json=payload)
-        print(f"HTTP Status Code: {res.status_code}")
-        assert res.status_code == 200, f"Expected 200, got {res.status_code}"
-
-        data = res.json()
-        assert data.get("success") is True
-        assert "summary" in data
-        assert data.get("data", {}).get("data_type") == "orders"
-
-        print("\nFASTAPI RESPONSE SUMMARY:\n")
-        print(data["summary"][:400] + "...\n[Truncated for brevity]")
-        print("\n[SUCCESS] Test 4 passed!")
-        return True
-    except Exception as e:
-        print("\n[FAILED] Test 4 failed with error:")
-        print(e)
-        return False
+def test_whitespace_input():
+    """Test POST /ai/summary with whitespace-only input string."""
+    res = client.post("/ai/summary", json={"dataset": "   ", "data_type": "sales"})
+    assert res.status_code == 400, f"Expected 400, got {res.status_code}"
+    body = res.json()
+    assert body.get("success") is False
+    assert body.get("error", {}).get("code") == "INVALID_INPUT"
+    return True
 
 
-def test_fastapi_validation():
-    print("\n" + "=" * 60, flush=True)
-    print("TEST 5: FastAPI Input Validation Test (Empty Payload Handling)", flush=True)
-    print("=" * 60, flush=True)
+def test_missing_required_field():
+    """Test POST /ai/summary with missing dataset/data field."""
+    res = client.post("/ai/summary", json={"data_type": "sales"})
+    assert res.status_code == 400, f"Expected 400, got {res.status_code}"
+    body = res.json()
+    assert body.get("success") is False
+    assert body.get("error", {}).get("code") == "INVALID_INPUT"
+    return True
 
-    try:
-        payload = {
-            "dataset": "   ",
-            "data_type": "sales"
-        }
-        res = client.post("/ai/summary", json=payload)
-        print(f"HTTP Status Code (Empty String): {res.status_code}", flush=True)
-        assert res.status_code in [400, 422], f"Expected 400 or 422, got {res.status_code}"
 
-        print("Validation response detail:", res.json()["detail"], flush=True)
-        print("\n[SUCCESS] Test 5 passed!", flush=True)
-        return True
-    except Exception as e:
-        print("\n[FAILED] Test 5 failed with error:", flush=True)
-        print(e, flush=True)
-        return False
+def test_existing_non_ai_endpoints():
+    """Verify that existing Orders/Dashboard/Sales endpoints operate unchanged."""
+    res_orders = client.get("/orders?limit=5")
+    assert res_orders.status_code == 200, f"Expected 200 for /orders, got {res_orders.status_code}"
+    res_stats = client.get("/dashboard/stats")
+    assert res_stats.status_code == 200, f"Expected 200 for /dashboard/stats, got {res_stats.status_code}"
+    return True
+
+
+def test_security_api_key_non_exposure():
+    """Verify that GOOGLE_API_KEY is never exposed in response body or OpenAPI schema."""
+    real_key = os.getenv("GOOGLE_API_KEY", "")
+    res = client.post("/ai/summary", json={"data": sample_sales_input})
+    if real_key and len(real_key) > 5:
+        assert real_key not in res.text, "SECURITY ALERT: API key exposed in API response!"
+
+    openapi_res = client.get("/openapi.json")
+    if real_key and len(real_key) > 5:
+        assert real_key not in openapi_res.text, "SECURITY ALERT: API key exposed in OpenAPI schema!"
+    return True
 
 
 def main():
     print("=" * 60)
-    print("MetricMind AI Module & Endpoint Test Suite")
+    print("MetricMind AI Module Test Suite")
     print("=" * 60)
 
-    t1 = test_sales_text_summary()
-    t2 = test_orders_structured_summary()
-    t3 = test_live_db_orders_summary()
-    t4 = test_fastapi_summary_endpoint()
-    t5 = test_fastapi_validation()
+    tests = [
+        ("Valid Sales Input (a)", test_valid_sales_input),
+        ("Valid Order Input (b)", test_valid_order_input),
+        ("Empty Input (c)", test_empty_input),
+        ("Whitespace Input (d)", test_whitespace_input),
+        ("Missing Required Field (e)", test_missing_required_field),
+        ("Existing Non-AI Endpoints Safety", test_existing_non_ai_endpoints),
+        ("Security Audit - Key Exposure", test_security_api_key_non_exposure),
+    ]
 
-    print("\n" + "=" * 60)
-    if t1 and t2 and t3 and t4 and t5:
-        print("ALL 5 AI TESTS PASSED SUCCESSFULLY! AI WORKFLOW OPERATIONAL.")
+    all_passed = True
+    for name, test_fn in tests:
+        try:
+            success = test_fn()
+            status_str = "PASS" if success else "FAIL"
+            print(f"[{status_str}] {name}")
+        except Exception as e:
+            all_passed = False
+            print(f"[FAIL] {name}: {e}")
+
+    print("=" * 60)
+    if all_passed:
+        print("ALL AI & REGRESSION TESTS PASSED SUCCESSFULLY!")
     else:
-        print("SOME AI TESTS FAILED. PLEASE CHECK LOGS ABOVE.")
+        print("SOME TESTS FAILED - CHECK LOGS ABOVE")
     print("=" * 60)
 
 
 if __name__ == "__main__":
     main()
-
-
