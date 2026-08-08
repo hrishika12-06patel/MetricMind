@@ -14,7 +14,17 @@ from ai.routes import router as ai_router
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from db_stats import get_database_stats
+from db_stats import (
+    get_database_stats ,
+    get_dashboard_stats,
+    get_sales_by_region,
+    get_sales_by_category,
+    get_sales_by_year,
+    get_profit_by_region,
+    get_profit_by_category,
+    get_top_products,
+)
+
 from database import (
     Base,
     engine,
@@ -285,3 +295,161 @@ def show_indexes():
 @app.get("/database/stats")
 def database_stats(db: Session = Depends(get_db)):
     return get_database_stats(db)
+
+@app.get(
+    "/dashboard/stats",
+    tags=["Dashboard"],
+    summary="Get Dashboard Statistics",
+    description="Returns key business statistics for the dashboard."
+)
+def dashboard_stats(db: Session = Depends(get_db)):
+    try:
+        stats = get_dashboard_stats(db)
+
+        return {
+            "success": True,
+            "message": "Dashboard statistics fetched successfully.",
+            "data": stats
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+@app.get(
+    "/sales/by-region",
+    tags=["Sales"],
+    summary="Get Sales by Region",
+    description="Returns sales grouped by region."
+)
+def sales_by_region(db: Session = Depends(get_db)):
+    try:
+        data = get_sales_by_region(db)
+
+        return {
+            "success": True,
+            "message": "Sales by region fetched successfully.",
+            "data": data
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+
+@app.get(
+    "/sales/by-category",
+    tags=["Sales"],
+    summary="Get Sales by Category",
+    description="Returns sales grouped by product category."
+)
+def sales_by_category(db: Session = Depends(get_db)):
+    try:
+        data = get_sales_by_category(db)
+
+        return {
+            "success": True,
+            "message": "Sales by category fetched successfully.",
+            "data": data
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+
+@app.get(
+    "/sales/by-year",
+    tags=["Sales"],
+    summary="Get Sales by Year",
+    description="Returns sales grouped by year."
+)
+def sales_by_year(db: Session = Depends(get_db)):
+    try:
+        data = get_sales_by_year(db)
+
+        return {
+            "success": True,
+            "message": "Sales by year fetched successfully.",
+            "data": data
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+@app.get(
+    "/reports/profit-by-region",
+    tags=["Reports"],
+    summary="Get Profit by Region",
+    description="Returns profit grouped by region."
+)
+def profit_by_region(db: Session = Depends(get_db)):
+    try:
+        data = get_profit_by_region(db)
+
+        return {
+            "success": True,
+            "message": "Profit by region fetched successfully.",
+            "data": data
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+
+@app.get(
+    "/reports/profit-by-category",
+    tags=["Reports"],
+    summary="Get Profit by Category",
+    description="Returns profit grouped by product category."
+)
+def profit_by_category(db: Session = Depends(get_db)):
+    try:
+        data = get_profit_by_category(db)
+
+        return {
+            "success": True,
+            "message": "Profit by category fetched successfully.",
+            "data": data
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+
+@app.get(
+    "/reports/top-products",
+    tags=["Reports"],
+    summary="Get Top Products",
+    description="Returns the top-performing products."
+)
+def top_products(db: Session = Depends(get_db)):
+    try:
+        data = get_top_products(db)
+
+        return {
+            "success": True,
+            "message": "Top products fetched successfully.",
+            "data": data
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e)
+        }
