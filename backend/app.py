@@ -1,5 +1,13 @@
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
+
+from fastapi import Depends, FastAPI, Query
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
 # Add backend and project root directories to sys.path
 BASE_DIR = Path(__file__).resolve().parent
@@ -8,33 +16,27 @@ for d in [str(BASE_DIR), str(ROOT_DIR)]:
     if d not in sys.path:
         sys.path.insert(0, d)
 
-from contextlib import asynccontextmanager
-
 from ai.routes import router as ai_router
-from fastapi import FastAPI, Depends, Query
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from db_stats import (
-    get_database_stats ,
-    get_dashboard_stats,
-    get_sales_by_region,
-    get_sales_by_category,
-    get_sales_by_year,
-    get_profit_by_region,
-    get_profit_by_category,
-    get_top_products,
-)
-
 from database import (
     Base,
-    engine,
-    test_connection, 
-    get_db,
-    get_all_orders, 
-    count_total_orders,
-    calculate_total_sales, 
     calculate_total_profit,
-    create_indexes, 
+    calculate_total_sales,
+    count_total_orders,
+    create_indexes,
+    engine,
+    get_all_orders,
+    get_db,
+    test_connection,
+)
+from db_stats import (
+    get_dashboard_stats,
+    get_database_stats,
+    get_profit_by_category,
+    get_profit_by_region,
+    get_sales_by_category,
+    get_sales_by_region,
+    get_sales_by_year,
+    get_top_products,
 )
 
 @asynccontextmanager
@@ -53,6 +55,28 @@ app = FastAPI(
         "name": "MetricMind Team"
     }
 )
+
+@app.exception_handler(RequestValidationError)
+async def ai_request_validation_exception_handler(request, exc: RequestValidationError):
+    if request.url.path.startswith("/ai"):
+        error_messages = []
+        for error in exc.errors():
+            loc = " -> ".join([str(l) for l in error.get("loc", []) if l != "body"])
+            msg = error.get("msg", "")
+            error_messages.append(f"{loc}: {msg}" if loc else msg)
+        clean_msg = "; ".join(error_messages) if error_messages else "Invalid request payload format."
+        return JSONResponse(
+            status_code=400,
+            content={
+                "success": False,
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": f"Validation Error: {clean_msg}"
+                }
+            }
+        )
+    return await request_validation_exception_handler(request, exc)
+
 app.include_router(ai_router)
 
 app.add_middleware(

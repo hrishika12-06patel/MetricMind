@@ -1,6 +1,7 @@
 from typing import Union, List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query, status
-from pydantic import BaseModel, Field, field_validator
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy.orm import Session
 
 try:
@@ -29,9 +30,15 @@ class AISummaryRequest(BaseModel):
     """
     Request model for generating AI business insights from sales or order data.
     Accepts raw text, a list of JSON records, or aggregated metrics dictionaries.
+    Supports input via 'dataset' or 'data'.
     """
-    dataset: Union[str, List[Dict[str, Any]], Dict[str, Any]] = Field(
-        ...,
+    data: Optional[Union[str, List[Dict[str, Any]], Dict[str, Any]]] = Field(
+        default=None,
+        description="Dataset content to analyze (alias for 'dataset'). Can be raw formatted text, list of records, or metrics object.",
+        examples=["Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70"]
+    )
+    dataset: Optional[Union[str, List[Dict[str, Any]], Dict[str, Any]]] = Field(
+        default=None,
         description="Dataset content to analyze. Can be formatted text, list of order records, or aggregated metrics dictionary.",
         examples=[
             {
@@ -54,14 +61,23 @@ class AISummaryRequest(BaseModel):
         examples=["Summarize key profit drivers, risks, and recommendations."]
     )
 
-    @field_validator("dataset")
+    @model_validator(mode="before")
     @classmethod
-    def validate_dataset_not_empty(cls, v):
-        if isinstance(v, str) and not v.strip():
-            raise ValueError("Dataset input string cannot be empty or whitespace.")
-        if isinstance(v, (list, dict)) and len(v) == 0:
-            raise ValueError("Dataset payload cannot be empty.")
-        return v
+    def normalize_and_validate_inputs(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if "dataset" not in values or values.get("dataset") is None:
+                if "data" in values and values.get("data") is not None:
+                    values["dataset"] = values["data"]
+
+            raw_dataset = values.get("dataset")
+            if raw_dataset is None:
+                raise ValueError("Dataset input is required (use 'dataset' or 'data' field).")
+
+            if isinstance(raw_dataset, str) and not raw_dataset.strip():
+                raise ValueError("Dataset input string cannot be empty or whitespace.")
+            if isinstance(raw_dataset, (list, dict)) and len(raw_dataset) == 0:
+                raise ValueError("Dataset payload cannot be empty.")
+        return values
 
 
 class AISummaryResponseData(BaseModel):
@@ -74,9 +90,22 @@ class AISummaryResponseData(BaseModel):
 class AISummaryResponse(BaseModel):
     """Response model for AI summary generation."""
     success: bool = Field(True, description="Operation success status.")
-    message: str = Field("AI summary generated successfully.", description="Status message.")
     summary: str = Field(..., description="AI-generated markdown summary.")
-    data: AISummaryResponseData = Field(..., description="Structured payload containing summary details.")
+    data_type: str = Field("sales", description="Type of dataset analyzed.")
+    message: Optional[str] = Field("AI summary generated successfully.", description="Status message.")
+    data: Optional[AISummaryResponseData] = Field(None, description="Structured payload containing summary details.")
+
+
+class AIErrorDetails(BaseModel):
+    """Structured error payload details."""
+    code: str = Field(..., description="Error code identifier (e.g., 'INVALID_INPUT', 'CONFIG_ERROR', 'PROVIDER_ERROR').")
+    message: str = Field(..., description="Human-readable error description.")
+
+
+class AIErrorResponse(BaseModel):
+    """Standardized error response model for AI API endpoints."""
+    success: bool = Field(False, description="Operation success status (always false for errors).")
+    error: AIErrorDetails = Field(..., description="Structured error details.")
 
 
 class AIOrdersRequest(BaseModel):
@@ -135,23 +164,85 @@ class AILiveOrdersResponse(BaseModel):
     response_model=AISummaryResponse,
     status_code=status.HTTP_200_OK,
     summary="Generate AI Business Summary (Primary Endpoint)",
-    description="Production-ready endpoint that accepts sales/order data in text or JSON format and returns a structured AI-generated business summary."
+    description="Production-ready endpoint that accepts sales/order data in text or JSON format and returns a structured AI-generated business summary.",
+    responses={
+        200: {
+            "model": AISummaryResponse,
+            "description": "Successful AI summary generation",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": True,
+                        "summary": "# Executive Summary\nSales increased by 25%...",
+                        "data_type": "sales"
+                    }
+                }
+            }
+        },
+        400: {
+            "model": AIErrorResponse,
+            "description": "Invalid input / Empty dataset",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "error": {
+                            "code": "INVALID_INPUT",
+                            "message": "Dataset input cannot be empty or whitespace-only."
+                        }
+                    }
+                }
+            }
+        },
+        502: {
+            "model": AIErrorResponse,
+            "description": "AI provider service error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "error": {
+                            "code": "PROVIDER_ERROR",
+                            "message": "The AI provider is temporarily unavailable. Please try again."
+                        }
+                    }
+                }
+            }
+        },
+        503: {
+            "model": AIErrorResponse,
+            "description": "AI configuration error (missing key)",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "error": {
+                            "code": "CONFIG_ERROR",
+                            "message": "GOOGLE_API_KEY is not configured. Add it to the project .env file."
+                        }
+                    }
+                }
+            }
+        }
+    }
 )
 def generate_ai_summary(request: AISummaryRequest):
     """
     Primary endpoint for generating AI-powered business summaries from sales or order datasets.
     """
     try:
+        dataset_to_use = request.dataset or request.data
         summary_text = AIInsightService.generate_summary(
-            data=request.dataset,
+            data=dataset_to_use,
             data_type=request.data_type,
             question=request.question
         )
 
         return AISummaryResponse(
             success=True,
-            message="AI summary generated successfully.",
             summary=summary_text,
+            data_type=request.data_type,
+            message="AI summary generated successfully.",
             data=AISummaryResponseData(
                 data_type=request.data_type,
                 summary=summary_text,
@@ -160,24 +251,48 @@ def generate_ai_summary(request: AISummaryRequest):
         )
 
     except ValueError as ve:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid Request Input: {str(ve)}"
+            content={
+                "success": False,
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": str(ve)
+                }
+            }
         )
     except AIConfigurationError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(exc),
-        ) from exc
+            content={
+                "success": False,
+                "error": {
+                    "code": "CONFIG_ERROR",
+                    "message": str(exc)
+                }
+            }
+        )
     except AIProviderError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="The AI provider is temporarily unavailable. Please try again.",
-        ) from exc
+            content={
+                "success": False,
+                "error": {
+                    "code": "PROVIDER_ERROR",
+                    "message": str(exc)
+                }
+            }
+        )
     except Exception as e:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI Service Error: {str(e)}"
+            content={
+                "success": False,
+                "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "An internal server error occurred while processing the AI summary request."
+                }
+            }
         )
 
 
