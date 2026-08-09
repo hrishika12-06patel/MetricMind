@@ -1,39 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type Order = {
+  "Order.ID": string | number;
+  "Customer.Name": string;
+  "Product.Name": string;
+  Category: string;
+  Region: string;
+  Sales: number;
+  Profit: number;
+};
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [search, setSearch] = useState("");
-  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
+  const [regionFilter, setRegionFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
-  const totalSales = orders.reduce(
-  (sum, order) => sum + Number(order["Sales"] || 0),
-  0
-);
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-const totalProfit = orders.reduce(
-  (sum, order) => sum + Number(order["Profit"] || 0),
-  0
-);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 10;
+
 
   useEffect(() => {
     async function fetchOrders() {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/orders");
+       try {
+        setLoading(true);
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/orders?limit=100"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
+        }
 
         const data = await response.json();
 
         if (data.success) {
-          setOrders(data.data);
-          setFilteredOrders(data.data);
+          setOrders(data.data || []);
         } else {
-          setError(data.message);
+          setError(data.message || "Unable to fetch orders.");
         }
       } catch (err) {
-        setError("Unable to fetch orders.");
+        setError("Unable to connect to the backend.");
       } finally {
         setLoading(false);
       }
@@ -42,367 +58,524 @@ const totalProfit = orders.reduce(
     fetchOrders();
   }, []);
 
-  useEffect(() => {
-  const filtered = orders.filter((order) =>
-    order["Customer.Name"]
-      ?.toLowerCase()
-      .includes(search.toLowerCase())
+  const filteredAndSortedOrders = useMemo(() => {
+    let result = [...orders];
+
+  // Search
+    if (search.trim()) {
+      const searchValue = search.toLowerCase();
+
+      result = result.filter(
+        (order) =>
+          String(order["Order.ID"]).toLowerCase().includes(searchValue) ||
+          String(order["Customer.Name"])
+            .toLowerCase()
+            .includes(searchValue) ||
+          String(order["Product.Name"])
+            .toLowerCase()
+            .includes(searchValue)
+      );
+    }
+
+    // Region filter
+    if (regionFilter) {
+      result = result.filter(
+        (order) => order.Region === regionFilter
+      );
+    }
+
+    // Category filter
+    if (categoryFilter) {
+      result = result.filter(
+        (order) => order.Category === categoryFilter
+      );
+    }
+
+    // Sorting
+    if (sortBy) {
+      result.sort((a, b) => {
+        let valueA: any = a[sortBy as keyof Order];
+        let valueB: any = b[sortBy as keyof Order];
+
+        if (typeof valueA === "number") {
+          return sortOrder === "asc"
+            ? valueA - valueB
+            : valueB - valueA;
+        }
+
+        return sortOrder === "asc"
+          ? String(valueA).localeCompare(String(valueB))
+          : String(valueB).localeCompare(String(valueA));
+      });
+    }
+
+    return result;
+  }, [
+    orders,
+    search,
+    regionFilter,
+    categoryFilter,
+    sortBy,
+    sortOrder,
+  ]);
+
+  const totalPages = Math.ceil(
+    filteredAndSortedOrders.length / ordersPerPage
   );
 
-  setFilteredOrders(filtered);
-}, [search, orders]);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+
+  const displayedOrders = filteredAndSortedOrders.slice(
+    startIndex,
+    startIndex + ordersPerPage
+  );
+
+  const totalSales = orders.reduce(
+    (sum, order) => sum + Number(order.Sales || 0),
+    0
+  );
+
+  const totalProfit = orders.reduce(
+    (sum, order) => sum + Number(order.Profit || 0),
+    0
+  );
+
+  const regions = [...new Set(orders.map((order) => order.Region))];
+
+  const categories = [
+    ...new Set(orders.map((order) => order.Category)),
+  ];
+
+  const resetFilters = () => {
+    setSearch("");
+    setRegionFilter("");
+    setCategoryFilter("");
+    setSortBy("");
+    setSortOrder("asc");
+    setCurrentPage(1);
+  };
 
   if (loading) {
-    return <h2 style={{ padding: "40px" }}>
+    return (
       <div
         style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        fontSize: "24px",
-        color: "#794d6c",
+          minHeight: "100vh",
+          background:
+            "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "#794d6c",
+          fontSize: "24px",
+          fontWeight: "600",
         }}
       >
-         Loading Orders...
+        Loading Orders...
       </div>
-      </h2>;
+    );
   }
 
   if (error) {
-    return <h2 style={{ padding: "40px", color: "#DC2626" }}>{error}</h2>;
-  }
-
-  if (orders.length === 0) {
-    return <h2 style={{ padding: "40px", color: "#1F2937" }}>No Orders Found.</h2>;
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
+          padding: "60px 40px",
+          color: "#DC2626",
+          fontSize: "20px",
+        }}
+      >
+        {error}
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: "40px",
-      background: "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-      minHeight: "100vh",
-      fontFamily: "Arial, sans-serif",
-      color: "#1F2937",
-    }}
-    >
-    
-      <div
-  style={{
-    marginBottom: "30px",
-  }}
->
-  <h1
-    style={{
-      fontSize: "36px",
-      color: "#52465A",
-      marginBottom: "8px",
-    }}
-  >
-    📦 Orders
-  </h1>
-
-  <p
-    style={{
-      color: "#64748B",
-      fontSize: "16px",
-    }}
-  >
-    Manage and track customer orders efficiently.
-  </p>
-</div>
-
-      <br />
-
-      <div
-  style={{
-    background: "white",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-    marginBottom: "25px",
-  }}
->
-  <input
-    type="text"
-    placeholder="🔍 Search Orders..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    style={{
-      padding: "10px",
-      width: "300px",
-      borderRadius: "8px",
-      border: "1px solid #E5E7EB",
-    }}
-  />
-
-  <button
-    style={{
-      background:"#794d6c",
-      color:"white",
-      border:"none",
-      padding:"10px 18px",
-      borderRadius:"8px",
-      cursor:"pointer",
-    fontWeight:"600"
-    }}
-  >
-    Search
-  </button>
-
-  <button
-    style={{
-      background:"#794d6c",
-      color:"white",
-      border:"none",
-      padding:"10px 18px",
-      borderRadius:"8px",
-      cursor:"pointer",
-      fontWeight:"600"
-    }}
-  >
-    Filter
-  </button>
-
-  <button
-    style={{
-      background:"#794d6c",
-      color:"white",
-      border:"none",
-      padding:"10px 18px",
-      borderRadius:"8px",
-      cursor:"pointer",
-      fontWeight:"600"
-    }}
-  >
-    Sort
-  </button>
-</div>
-
-<div
-  style={{
-    display: "flex",
-    gap: "20px",
-    marginBottom: "25px",
-  }}
->
-  <div
-    style={{
-      background: "white",
-      padding: "20px",
-      borderRadius: "12px",
-      boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-      flex: 1,
-      color: "#1F2937",
-    }}
-  >
-    <h3
+    <main
       style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
+        padding: "60px 40px",
+        fontFamily: "Arial, sans-serif",
         color: "#404e62",
-        marginBottom: "8px",
       }}
     >
-      Total Orders
-    </h3>
-    <h2
-      style={{
-        color: "#794d6c",
-        fontSize: "30px",
-        margin: 0,
-        fontWeight:"700",
-      }}
-    >
-      {orders.length}
-    </h2>
-  </div>
+      <section
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
+        {/* Header */}
+        <h1
+          style={{
+            fontSize: "48px",
+            fontWeight: "800",
+            color: "#52465A",
+            marginBottom: "10px",
+          }}
+        >
+          📦 Orders
+        </h1>
 
-  <div
-    style={{
-      background: "white",
-      padding: "20px",
-      borderRadius: "12px",
-      boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-      flex: 1,
-      color: "#1F2937",
-    }}
-  >
-    <h3
-      style={{
-        color: "#6B7280",
-        marginBottom: "10px",
-      }}
-    >
-      Total Sales
-    </h3>
-    <h2
-      style={{
-        color: "#794d6c",
-        fontSize: "30px",
-        margin: 0,
-      }}
-    >
-      ₹ {totalSales.toFixed(2)}
-    </h2>
-  </div>
+        <p
+          style={{
+            color: "#64748B",
+            fontSize: "18px",
+            marginBottom: "35px",
+          }}
+        >
+          Track and analyze customer orders and business activity.
+        </p>
 
-  <div
-    style={{
-      background: "white",
-      padding: "20px",
-      borderRadius: "12px",
-      boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-      flex: 1,
-      color: "#1F2937",
-    }}
-  >
-    <h3
-      style={{
-        color: "#6B7280",
-        marginBottom: "10px",
-      }}
-    >
-      Total Profit
-    </h3>
-    <h2
-      style={{
-        color: "#794d6c",
-        fontSize: "30px",
-        margin: 0,
-      }}
-    >
-      ₹ {totalProfit.toFixed(2)}
-    </h2>
-  </div>
-</div>
-
-      <br />
-      <br />
-
-      <div style={{ overflowX: "auto" }}>
+        {/* Summary Cards */}
         <div
           style={{
-            background: "white",
-            borderRadius: "12px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(220px,1fr))",
+            gap: "20px",
+            marginBottom: "30px",
+          }}
+        >
+          <SummaryCard
+            title="Total Orders"
+            value={orders.length.toLocaleString()}
+          />
+
+          <SummaryCard
+            title="Total Sales"
+            value={`₹ ${totalSales.toFixed(2)}`}
+          />
+
+          <SummaryCard
+            title="Total Profit"
+            value={`₹ ${totalProfit.toFixed(2)}`}
+          />
+        </div>
+
+        {/* Controls */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            padding: "22px",
+            borderRadius: "18px",
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+            marginBottom: "25px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="🔍 Search orders..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              style={inputStyle}
+            />
+
+            <select
+              value={regionFilter}
+              onChange={(e) => {
+                setRegionFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              style={inputStyle}
+            >
+              <option value="">All Regions</option>
+
+              {regions.map((region) => (
+                <option key={region} value={region}>
+                  {region}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              style={inputStyle}
+            >
+              <option value="">All Categories</option>
+
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="">Sort By</option>
+              <option value="Sales">Sales</option>
+              <option value="Profit">Profit</option>
+              <option value="Region">Region</option>
+              <option value="Category">Category</option>
+            </select>
+
+            <button
+              onClick={() =>
+                setSortOrder(
+                  sortOrder === "asc" ? "desc" : "asc"
+                )
+              }
+              style={buttonStyle}
+            >
+              {sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
+            </button>
+
+            <button
+              onClick={resetFilters}
+              style={{
+                ...buttonStyle,
+                background: "#52465A",
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div
+          style={{
+            background: "#FFFFFF",
+            borderRadius: "18px",
             padding: "20px",
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
             overflowX: "auto",
           }}
         >
-          {filteredOrders.length === 0 ? (
-  <p
-    style={{
-      textAlign: "center",
-      color: "#404e62",
-      padding: "20px",
-    }}
-  >
-    No matching orders found.
-  </p>
-) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-            }}
-          >
-            <thead
+          {displayedOrders.length === 0 ? (
+            <div
               style={{
-                background: "#794d6c",
-                color: "white",
-                textAlign: "left",
-              }}>
-              <tr>
-                <th style={{ padding: "15px" }}>Order ID</th>
-                <th style={{ padding: "15px" }}>Customer</th>
-                <th style={{ padding: "15px" }}>Product</th>
-                <th style={{ padding: "15px" }}>Category</th>
-                <th style={{ padding: "15px" }}>Region</th>
-                <th style={{ padding: "15px" }}>Sales</th>
-                <th style={{ padding: "15px" }}>Profit</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredOrders.map((order: any, index: number) => (
-                <tr 
-                  key={index}
-                  style={{
-                    backgroundColor:
-                    index % 2 === 0 
-                    ? "#FFFFFF" 
-                    : "#F8FAFC",
-                    cursor: "pointer",
-                  }}
-                >
-                  <td 
-                    style={{
-                     padding: "12px",
-                      textAlign: "center",
-                    }}
+                padding: "50px",
+                textAlign: "center",
+                color: "#64748B",
+              }}
+            >
+              No matching orders found.
+            </div>
+          ) : (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: "850px",
+              }}
+            >
+              <thead
+                style={{
+                  background: "#794d6c",
+                  color: "#FFFFFF",
+                }}
+              >
+                <tr>
+                  {[
+                    "Order ID",
+                    "Customer",
+                    "Product",
+                    "Category",
+                    "Region",
+                    "Sales",
+                    "Profit",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      style={{
+                        padding: "15px",
+                        textAlign: "center",
+                      }}
                     >
-                      {order["Order.ID"]}
-                  </td>
-                  <td 
-                    style={{ 
-                      padding: "12px",
-                      textAlign: "center", 
-                    }}
-                  >
-                    {order["Customer.Name"]}
-                  </td>
-                  <td 
-                    style={{ 
-                      padding: "12px" ,
-                      textAlign: "center",
-                    }}
-                  >
-                    {order["Product.Name"]}
-                  </td>
-                  <td 
-                    style={{ 
-                      padding: "12px", 
-                      textAlign: "center"
-                     }}
-                  >
-                    {order["Category"]}
-                  </td>
-                  <td 
-                    style={{ 
-                      padding: "12px", 
-                      textAlign: "center" 
-                    }}
-                  >
-                    {order["Region"]}
-                  </td>
-                  <td 
-                    style={{ 
-                      padding: "12px", 
-                      textAlign: "center" , 
-                      color: "#794d6c", 
-                      fontWeight: "bold" 
-                    }}
-                  >
-                    ₹ {Number(order["Sales"]).toFixed(2)}
-                  </td>
-                  <td 
-                    style={{ 
-                      padding: "12px", 
-                      textAlign: "center",
-                      color: "#794d6c",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    ₹ {Number(order["Profit"]).toFixed(2)}
-                  </td>
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {displayedOrders.map((order, index) => (
+                  <tr
+                    key={index}
+                    style={{
+                      background:
+                        index % 2 === 0
+                          ? "#FFFFFF"
+                          : "#F8FAFC",
+                    }}
+                  >
+                    <td style={cellStyle}>
+                      {order["Order.ID"]}
+                    </td>
+
+                    <td style={cellStyle}>
+                      {order["Customer.Name"]}
+                    </td>
+
+                    <td style={cellStyle}>
+                      {order["Product.Name"]}
+                    </td>
+
+                    <td style={cellStyle}>
+                      {order.Category}
+                    </td>
+
+                    <td style={cellStyle}>
+                      {order.Region}
+                    </td>
+
+                    <td
+                      style={{
+                        ...cellStyle,
+                        color: "#794d6c",
+                        fontWeight: "700",
+                      }}
+                    >
+                      ₹ {Number(order.Sales).toFixed(2)}
+                    </td>
+
+                    <td
+                      style={{
+                        ...cellStyle,
+                        color: "#794d6c",
+                        fontWeight: "700",
+                      }}
+                    >
+                      ₹ {Number(order.Profit).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
-      </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "15px",
+              marginTop: "25px",
+            }}
+          >
+            <button
+              disabled={currentPage === 1}
+              onClick={() =>
+                setCurrentPage((page) => page - 1)
+              }
+              style={buttonStyle}
+            >
+              ← Previous
+            </button>
+
+            <span
+              style={{
+                color: "#52465A",
+                fontWeight: "600",
+              }}
+            >
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() =>
+                setCurrentPage((page) => page + 1)
+              }
+              style={buttonStyle}
+            >
+              Next →
+            </button>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function SummaryCard({
+  title,
+  value,
+}: {
+  title: string;
+  value: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "#FFFFFF",
+        borderRadius: "18px",
+        padding: "24px",
+        border: "1px solid #E5E7EB",
+        boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+      }}
+    >
+      <h3
+        style={{
+          color: "#64748B",
+          marginBottom: "10px",
+        }}
+      >
+        {title}
+      </h3>
+
+      <h2
+        style={{
+          color: "#794d6c",
+          fontSize: "30px",
+          fontWeight: "700",
+        }}
+      >
+        {value}
+      </h2>
     </div>
   );
 }
+
+const inputStyle = {
+  padding: "11px 14px",
+  borderRadius: "9px",
+  border: "1px solid #E5E7EB",
+  background: "#FFFFFF",
+  color: "#404e62",
+  minWidth: "180px",
+};
+
+const buttonStyle = {
+  background: "#794d6c",
+  color: "#FFFFFF",
+  border: "none",
+  padding: "11px 18px",
+  borderRadius: "9px",
+  cursor: "pointer",
+  fontWeight: "600",
+};
+
+const cellStyle = {
+  padding: "13px",
+  textAlign: "center" as const,
+  color: "#404e62",
+};
