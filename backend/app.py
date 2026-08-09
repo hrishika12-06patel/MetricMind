@@ -56,6 +56,8 @@ app = FastAPI(
     }
 )
 
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 @app.exception_handler(RequestValidationError)
 async def ai_request_validation_exception_handler(request, exc: RequestValidationError):
     if request.url.path.startswith("/ai"):
@@ -76,6 +78,24 @@ async def ai_request_validation_exception_handler(request, exc: RequestValidatio
             }
         )
     return await request_validation_exception_handler(request, exc)
+
+@app.exception_handler(StarletteHTTPException)
+async def ai_http_exception_handler(request, exc: StarletteHTTPException):
+    if request.url.path.startswith("/ai"):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "error": {
+                    "code": "INVALID_INPUT" if exc.status_code == 400 else "AI_ERROR",
+                    "message": str(exc.detail) if exc.detail else "Invalid request."
+                }
+            }
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
 
 app.include_router(ai_router)
 
