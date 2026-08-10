@@ -30,23 +30,22 @@ class AISummaryRequest(BaseModel):
     """
     Request model for generating AI business insights from sales or order data.
     Accepts raw text, a list of JSON records, or aggregated metrics dictionaries.
-    Supports input via 'dataset' or 'data'.
+    Supports input via 'data' or 'dataset'.
     """
     data: Optional[Union[str, List[Dict[str, Any]], Dict[str, Any]]] = Field(
         default=None,
-        description="Dataset content to analyze (alias for 'dataset'). Can be raw formatted text, list of records, or metrics object.",
+        description="Dataset content to analyze. Can be formatted text, list of order records, or aggregated metrics object.",
         examples=["Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70"]
     )
     dataset: Optional[Union[str, List[Dict[str, Any]], Dict[str, Any]]] = Field(
         default=None,
-        description="Dataset content to analyze. Can be formatted text, list of order records, or aggregated metrics dictionary.",
+        description="Dataset content to analyze (alias for 'data').",
         examples=[
             {
                 "total_orders": 1250,
                 "total_sales": 345000.75,
                 "total_profit": 48200.50,
-                "top_category": "Technology",
-                "underperforming_category": "Furniture"
+                "top_category": "Technology"
             }
         ]
     )
@@ -61,6 +60,34 @@ class AISummaryRequest(BaseModel):
         examples=["Summarize key profit drivers, risks, and recommendations."]
     )
 
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "summary": "Sales Dataset Example",
+                    "value": {
+                        "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
+                        "data_type": "sales"
+                    }
+                },
+                {
+                    "summary": "Orders Dataset Example",
+                    "value": {
+                        "data": {
+                            "total_orders": 1250,
+                            "total_sales": 345000.75,
+                            "total_profit": 48200.50,
+                            "top_category": "Technology",
+                            "underperforming_category": "Furniture"
+                        },
+                        "data_type": "orders",
+                        "question": "Analyze order performance and suggest optimizations."
+                    }
+                }
+            ]
+        }
+    }
+
     @model_validator(mode="before")
     @classmethod
     def normalize_and_validate_inputs(cls, values: Any) -> Any:
@@ -71,8 +98,10 @@ class AISummaryRequest(BaseModel):
 
             raw_dataset = values.get("dataset")
             if raw_dataset is None:
-                raise ValueError("Dataset input is required (use 'dataset' or 'data' field).")
+                raise ValueError("Dataset input is required (use 'data' or 'dataset' field).")
 
+            if isinstance(raw_dataset, bool) or isinstance(raw_dataset, (int, float)):
+                raise ValueError("Dataset input must be a formatted text string, list of records, or object dictionary.")
             if isinstance(raw_dataset, str) and not raw_dataset.strip():
                 raise ValueError("Dataset input string cannot be empty or whitespace.")
             if isinstance(raw_dataset, (list, dict)) and len(raw_dataset) == 0:
@@ -98,7 +127,7 @@ class AISummaryResponse(BaseModel):
 
 class AIErrorDetails(BaseModel):
     """Structured error payload details."""
-    code: str = Field(..., description="Error code identifier (e.g., 'INVALID_INPUT', 'CONFIG_ERROR', 'PROVIDER_ERROR').")
+    code: str = Field(..., description="Error code identifier (e.g., 'INVALID_INPUT', 'CONFIG_ERROR', 'PROVIDER_ERROR', 'INTERNAL_ERROR').")
     message: str = Field(..., description="Human-readable error description.")
 
 
@@ -126,6 +155,8 @@ class AIOrdersRequest(BaseModel):
     @field_validator("orders")
     @classmethod
     def validate_orders_not_empty(cls, v):
+        if isinstance(v, bool) or isinstance(v, (int, float)):
+            raise ValueError("Orders input must be a text string, list of records, or object dictionary.")
         if isinstance(v, str) and not v.strip():
             raise ValueError("Orders input string cannot be empty or whitespace.")
         if isinstance(v, (list, dict)) and len(v) == 0:
@@ -164,7 +195,33 @@ class AILiveOrdersResponse(BaseModel):
     response_model=AISummaryResponse,
     status_code=status.HTTP_200_OK,
     summary="Generate AI Business Summary (Primary Endpoint)",
-    description="Production-ready endpoint that accepts sales/order data in text or JSON format and returns a structured AI-generated business summary.",
+    description="""
+### POST /ai/summary - Production AI Summary Endpoint
+
+Generates structured business intelligence insights from sales or order datasets using **LangChain** and **Google Gemini LLM**.
+
+#### Contract & Usage Information for Frontend Integration:
+- **Method**: `POST`
+- **Endpoint**: `/ai/summary`
+- **Headers**: `Content-Type: application/json`
+
+#### Example Frontend Fetch Request:
+```javascript
+fetch(`${API_BASE_URL}/ai/summary`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    data: "Sales: 120,340,280,560,410\\nProfit: 20,55,45,120,70",
+    data_type: "sales"
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data.summary));
+```
+*Note: The frontend must use its configured backend API base URL (e.g. `process.env.NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL`), without hardcoding production hostnames.*
+""",
     responses={
         200: {
             "model": AISummaryResponse,
@@ -181,7 +238,7 @@ class AILiveOrdersResponse(BaseModel):
         },
         400: {
             "model": AIErrorResponse,
-            "description": "Invalid input / Empty dataset",
+            "description": "Validation error / Empty dataset / Invalid data types",
             "content": {
                 "application/json": {
                     "example": {
@@ -196,7 +253,7 @@ class AILiveOrdersResponse(BaseModel):
         },
         502: {
             "model": AIErrorResponse,
-            "description": "AI provider service error",
+            "description": "AI provider service failure or quota limit",
             "content": {
                 "application/json": {
                     "example": {
@@ -211,7 +268,7 @@ class AILiveOrdersResponse(BaseModel):
         },
         503: {
             "model": AIErrorResponse,
-            "description": "AI configuration error (missing key)",
+            "description": "AI configuration error (missing GOOGLE_API_KEY)",
             "content": {
                 "application/json": {
                     "example": {
@@ -283,7 +340,7 @@ def generate_ai_summary(request: AISummaryRequest):
                 }
             }
         )
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
@@ -331,24 +388,48 @@ def summarize_orders_endpoint(request: AIOrdersRequest):
         )
 
     except ValueError as ve:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid Request Input: {str(ve)}"
+            content={
+                "success": False,
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": str(ve)
+                }
+            }
         )
     except AIConfigurationError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(exc),
-        ) from exc
+            content={
+                "success": False,
+                "error": {
+                    "code": "CONFIG_ERROR",
+                    "message": str(exc)
+                }
+            }
+        )
     except AIProviderError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="The AI provider is temporarily unavailable. Please try again.",
-        ) from exc
-    except Exception as e:
-        raise HTTPException(
+            content={
+                "success": False,
+                "error": {
+                    "code": "PROVIDER_ERROR",
+                    "message": str(exc)
+                }
+            }
+        )
+    except Exception:
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI Service Error: {str(e)}"
+            content={
+                "success": False,
+                "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "An internal server error occurred while processing order insights."
+                }
+            }
         )
 
 
@@ -382,19 +463,37 @@ def summarize_live_orders_endpoint(
         )
 
     except AIConfigurationError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(exc),
-        ) from exc
+            content={
+                "success": False,
+                "error": {
+                    "code": "CONFIG_ERROR",
+                    "message": str(exc)
+                }
+            }
+        )
     except AIProviderError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="The AI provider is temporarily unavailable. Please try again.",
-        ) from exc
-    except Exception as e:
-        raise HTTPException(
+            content={
+                "success": False,
+                "error": {
+                    "code": "PROVIDER_ERROR",
+                    "message": str(exc)
+                }
+            }
+        )
+    except Exception:
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI Live Order Service Error: {str(e)}"
+            content={
+                "success": False,
+                "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "An internal server error occurred while generating live order insights."
+                }
+            }
         )
 
 

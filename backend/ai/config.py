@@ -14,7 +14,7 @@ else:
     load_dotenv()
 
 MODEL_NAME = os.getenv("MODEL_NAME", "gemini-2.5-flash")
-AI_REQUEST_TIMEOUT_SECONDS = float(os.getenv("AI_REQUEST_TIMEOUT_SECONDS", "30"))
+AI_REQUEST_TIMEOUT_SECONDS = float(os.getenv("AI_REQUEST_TIMEOUT_SECONDS", "10"))
 
 
 class AIConfigurationError(RuntimeError):

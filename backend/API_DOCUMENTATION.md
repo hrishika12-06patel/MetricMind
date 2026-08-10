@@ -462,28 +462,36 @@ GET /orders?sort_by=Sales&order=desc
 
 ```http
 POST /ai/summary
+Content-Type: application/json
 ```
 
 ### Purpose
 
-Generates a structured AI business intelligence summary from sales, financial, or order datasets using **LangChain** and **Google Gemini LLM**. Accepts raw text, structured JSON records, or aggregated metric dictionaries.
+Generates a structured AI business intelligence summary from sales, financial, or order datasets using **LangChain** and **Google Gemini LLM**. Accepts formatted text, structured JSON records, or aggregated metric dictionaries.
 
 ### Request Body (`AISummaryRequest`)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| dataset | String \| Object \| Array | Yes | Sales or order data to summarize |
-| data_type | String | No (Default: "sales") | Type of dataset (`sales`, `orders`, `financial`) |
-| question | String | No | Custom prompt objective or question |
+| `data` | String \| Object \| Array | Yes (or `dataset`) | Sales or order data to summarize |
+| `dataset` | String \| Object \| Array | Yes (or `data`) | Alias for `data` |
+| `data_type` | String | No (Default: `"sales"`) | Type of dataset (`"sales"`, `"orders"`, `"financial"`) |
+| `question` | String | No | Custom prompt objective or question |
 
-### Sample Request
+### Sample Request A: Sales Dataset (Raw Formatted Text)
 
-```http
-POST /ai/summary
-Content-Type: application/json
-
+```json
 {
-    "dataset": {
+    "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
+    "data_type": "sales"
+}
+```
+
+### Sample Request B: Orders Dataset (JSON Object)
+
+```json
+{
+    "data": {
         "total_orders": 1250,
         "total_sales": 345000.75,
         "total_profit": 48200.50,
@@ -495,50 +503,88 @@ Content-Type: application/json
 }
 ```
 
-### Sample Response (`AISummaryResponse`)
+### Sample Successful Response (`AISummaryResponse`)
 
 ```json
 {
     "success": true,
-    "message": "AI summary generated successfully.",
     "summary": "# Business Intelligence Report: MetricMind Orders Analysis\n\n## 1. Executive Summary\nDuring the evaluated period, MetricMind generated **$345,000.75** in total sales...",
-    "data": {
-        "data_type": "orders",
-        "summary": "# Business Intelligence Report: MetricMind Orders Analysis...",
-        "question": "Provide key executive summary and actionable recommendations."
-    }
+    "data_type": "orders",
+    "message": "AI summary generated successfully."
 }
 ```
 
 ---
 
-## 10.2 AI Summary Endpoint (Alias)
+## 10.2 Frontend Integration Contract
+
+Frontend applications should interact with `POST /ai/summary` using standard `fetch()` or `axios`. The frontend must use its dynamically configured API base URL (e.g. `process.env.NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL`), without hardcoding production hostnames.
+
+### Example JavaScript / TypeScript Fetch Implementation
+
+```javascript
+// Dynamic API Base URL configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+
+async function generateAISummary(dataset, dataType = "sales") {
+  try {
+    const response = await fetch(`${API_BASE_URL}/ai/summary`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: dataset,
+        data_type: dataType
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      console.log("AI Summary:", result.summary);
+      return result.summary;
+    } else {
+      console.error("AI Error Code:", result.error.code);
+      console.error("AI Error Message:", result.error.message);
+    }
+  } catch (err) {
+    console.error("Network or connectivity error:", err);
+  }
+}
+```
+
+---
+
+## 10.3 AI Summary Endpoint (Alias)
 
 ### Endpoint
 
 ```http
 POST /ai/summarize
+Content-Type: application/json
 ```
 
 ### Purpose
 
-Alias endpoint for `/ai/summary` to ensure backward compatibility for legacy clients. Same request/response schema as `POST /ai/summary`.
+Alias endpoint for `/ai/summary` to ensure backward compatibility for legacy clients. Uses the exact same request/response schema as `POST /ai/summary`.
 
 ---
 
-## 10.3 Order Insights Endpoint
+## 10.4 Order Insights Endpoint
 
 ### Endpoint
 
 ```http
 POST /ai/summarize-orders
+Content-Type: application/json
 ```
 
 ### Purpose
 
 Generates targeted AI business insights specifically formatted for order dataset records or aggregated order metrics.
 
-### Request Body (`AIOrdersRequest`)
+### Sample Request (`AIOrdersRequest`)
 
 ```json
 {
@@ -567,7 +613,7 @@ Generates targeted AI business insights specifically formatted for order dataset
 
 ---
 
-## 10.4 Live Database Orders AI Summary
+## 10.5 Live Database Orders AI Summary
 
 ### Endpoint
 
@@ -586,12 +632,6 @@ Queries live SQLite order records with optional filtering, calculates aggregated
 | region | String | Optional region filter (`East`, `West`, `South`, `Central`) |
 | category | String | Optional category filter (`Technology`, `Furniture`, `Office Supplies`) |
 | segment | String | Optional segment filter (`Consumer`, `Corporate`, `Home Office`) |
-
-### Sample Request
-
-```http
-GET /ai/summarize-live-orders?region=East
-```
 
 ### Sample Response (`AILiveOrdersResponse`)
 
@@ -622,39 +662,59 @@ GET /ai/summarize-live-orders?region=East
 
 ---
 
-### AI Module Error Responses
+## 10.6 AI Module Error Responses
 
-#### Bad Request / Input Validation Error (HTTP 400 or HTTP 422)
+All errors returned by the AI module adhere to a consistent JSON structure:
 
 ```json
 {
-    "detail": [
-        {
-            "type": "value_error",
-            "loc": ["body", "dataset"],
-            "msg": "Value error, Dataset input string cannot be empty or whitespace."
-        }
-    ]
+    "success": false,
+    "error": {
+        "code": "<ERROR_CODE>",
+        "message": "<Human-readable message>"
+    }
 }
 ```
 
-#### AI configuration error (HTTP 503)
+#### 1. Input Validation Error (HTTP 400)
 
-Returned when `GOOGLE_API_KEY` has not been configured. Non-AI endpoints remain available.
+Returned for empty input, whitespace-only data, missing required fields, or invalid data types.
 
 ```json
 {
-  "detail": "GOOGLE_API_KEY is not configured. Add it to the project .env file."
+    "success": false,
+    "error": {
+        "code": "INVALID_INPUT",
+        "message": "Dataset input cannot be empty or whitespace-only."
+    }
 }
 ```
 
-#### Gemini provider error (HTTP 502)
+#### 2. AI Provider Error (HTTP 502)
 
-Returned after the configured provider has been retried and could not produce a summary.
+Returned when Google Gemini LLM fails, times out, or exceeds rate limits.
 
 ```json
 {
-    "detail": "The AI provider is temporarily unavailable. Please try again."
+    "success": false,
+    "error": {
+        "code": "PROVIDER_ERROR",
+        "message": "The AI provider is temporarily unavailable. Please try again."
+    }
+}
+```
+
+#### 3. AI Configuration Error (HTTP 503)
+
+Returned when `GOOGLE_API_KEY` is not configured in the `.env` file.
+
+```json
+{
+    "success": false,
+    "error": {
+        "code": "CONFIG_ERROR",
+        "message": "GOOGLE_API_KEY is not configured. Add it to the project .env file."
+    }
 }
 ```
 ---
