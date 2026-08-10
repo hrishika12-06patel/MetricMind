@@ -64,21 +64,21 @@ export default function SalesPage() {
     fetchSalesData();
   }, []);
 
+  const totalSales = regionSales.reduce(
+    (sum, row) =>
+      sum +
+      Number(
+        row["Total Sales"] ||
+        row["Sales"] ||
+        row["total_sales"] ||
+        0
+      ),
+    0
+  );
+
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          color: "#794d6c",
-          fontSize: "24px",
-          fontWeight: "600",
-        }}
-      >
+      <div style={loadingStyle}>
         Loading Sales...
       </div>
     );
@@ -86,63 +86,32 @@ export default function SalesPage() {
 
   if (error) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-          padding: "60px 40px",
-          color: "#DC2626",
-          fontSize: "20px",
-        }}
-      >
+      <div style={errorStyle}>
         {error}
       </div>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-        padding: "60px 40px",
-        fontFamily: "Arial, sans-serif",
-        color: "#404e62",
-      }}
-    >
-      <section
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-        {/* Header */}
-        <h1
-          style={{
-            fontSize: "48px",
-            fontWeight: "800",
-            color: "#52465A",
-            marginBottom: "10px",
-          }}
-        >
-          💰 Sales
-        </h1>
+    <main style={pageStyle}>
+      <section style={containerStyle}>
 
-        <p
-          style={{
-            fontSize: "18px",
-            color: "#64748B",
-            marginBottom: "40px",
-            lineHeight: "30px",
-          }}
-        >
-          Analyze sales performance across regions, categories,
-          and years.
+        <h1 style={headingStyle}>💰 Sales</h1>
+
+        <p style={subtitleStyle}>
+          Analyze sales performance across regions,
+          categories and years.
         </p>
 
-        {/* Sales by Region */}
+        
+        <div style={summaryCardStyle}>
+          <h3>Total Sales</h3>
+          <h2 style={summaryValueStyle}>
+            ₹ {totalSales.toFixed(2)}
+          </h2>
+        </div>
+
+        
         <section style={sectionStyle}>
           <h2 style={sectionTitle}>
             🌎 Sales by Region
@@ -151,14 +120,11 @@ export default function SalesPage() {
           {regionSales.length === 0 ? (
             <EmptyState />
           ) : (
-            <DataTable
-              data={regionSales}
-              firstColumn="Region"
-            />
+            <DataTable data={regionSales} />
           )}
         </section>
 
-        {/* Sales by Category */}
+        
         <section style={sectionStyle}>
           <h2 style={sectionTitle}>
             📦 Sales by Category
@@ -167,14 +133,11 @@ export default function SalesPage() {
           {categorySales.length === 0 ? (
             <EmptyState />
           ) : (
-            <DataTable
-              data={categorySales}
-              firstColumn="Category"
-            />
+            <DataTable data={categorySales} />
           )}
         </section>
 
-        {/* Sales by Year */}
+        
         <section style={sectionStyle}>
           <h2 style={sectionTitle}>
             📅 Sales by Year
@@ -183,12 +146,10 @@ export default function SalesPage() {
           {yearSales.length === 0 ? (
             <EmptyState />
           ) : (
-            <DataTable
-              data={yearSales}
-              firstColumn="Year"
-            />
+            <DataTable data={yearSales} />
           )}
         </section>
+
       </section>
     </main>
   );
@@ -196,41 +157,19 @@ export default function SalesPage() {
 
 function DataTable({
   data,
-  firstColumn,
 }: {
   data: SalesData[];
-  firstColumn: string;
 }) {
-  if (!data.length) {
-    return <EmptyState />;
-  }
-
-  const columns = Object.keys(data[0]);
+  const columns = Object.keys(data[0] || {});
 
   return (
     <div style={{ overflowX: "auto" }}>
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          minWidth: "600px",
-        }}
-      >
-        <thead
-          style={{
-            background: "#794d6c",
-            color: "#FFFFFF",
-          }}
-        >
+      <table style={tableStyle}>
+
+        <thead style={tableHeadStyle}>
           <tr>
             {columns.map((column) => (
-              <th
-                key={column}
-                style={{
-                  padding: "15px",
-                  textAlign: "center",
-                }}
-              >
+              <th key={column} style={thStyle}>
                 {column}
               </th>
             ))}
@@ -249,21 +188,7 @@ function DataTable({
               }}
             >
               {columns.map((column) => (
-                <td
-                  key={column}
-                  style={{
-                    padding: "14px",
-                    textAlign: "center",
-                    color:
-                      column === firstColumn
-                        ? "#52465A"
-                        : "#794d6c",
-                    fontWeight:
-                      column === firstColumn
-                        ? "600"
-                        : "700",
-                  }}
-                >
+                <td key={column} style={tdStyle}>
                   {typeof row[column] === "number"
                     ? Number(row[column]).toFixed(2)
                     : row[column]}
@@ -272,6 +197,7 @@ function DataTable({
             </tr>
           ))}
         </tbody>
+
       </table>
     </div>
   );
@@ -279,17 +205,53 @@ function DataTable({
 
 function EmptyState() {
   return (
-    <div
-      style={{
-        padding: "35px",
-        textAlign: "center",
-        color: "#64748B",
-      }}
-    >
+    <div style={emptyStyle}>
       No sales data available.
     </div>
   );
 }
+
+const pageStyle = {
+  minHeight: "100vh",
+  background:
+    "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
+  padding: "60px 40px",
+  fontFamily: "Arial, sans-serif",
+  color: "#404e62",
+};
+
+const containerStyle = {
+  maxWidth: "1200px",
+  margin: "0 auto",
+};
+
+const headingStyle = {
+  fontSize: "48px",
+  fontWeight: "800",
+  color: "#52465A",
+  marginBottom: "10px",
+};
+
+const subtitleStyle = {
+  fontSize: "18px",
+  color: "#64748B",
+  marginBottom: "35px",
+  lineHeight: "30px",
+};
+
+const summaryCardStyle = {
+  background: "#FFFFFF",
+  borderRadius: "18px",
+  padding: "25px",
+  border: "1px solid #E5E7EB",
+  boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+  marginBottom: "30px",
+};
+
+const summaryValueStyle = {
+  color: "#794d6c",
+  fontSize: "30px",
+};
 
 const sectionStyle = {
   background: "#FFFFFF",
@@ -304,4 +266,49 @@ const sectionTitle = {
   color: "#52465A",
   marginBottom: "20px",
   fontSize: "24px",
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse" as const,
+  minWidth: "600px",
+};
+
+const tableHeadStyle = {
+  background: "#794d6c",
+  color: "#FFFFFF",
+};
+
+const thStyle = {
+  padding: "15px",
+  textAlign: "center" as const,
+};
+
+const tdStyle = {
+  padding: "14px",
+  textAlign: "center" as const,
+  color: "#404e62",
+};
+
+const emptyStyle = {
+  padding: "35px",
+  textAlign: "center" as const,
+  color: "#64748B",
+};
+
+const loadingStyle = {
+  minHeight: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#794d6c",
+  fontSize: "24px",
+  fontWeight: "600",
+};
+
+const errorStyle = {
+  minHeight: "100vh",
+  padding: "60px 40px",
+  color: "#DC2626",
+  fontSize: "20px",
 };
