@@ -1,15 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import page from "../page";
 
 type Order = {
-  "Order.ID": string | number;
-  "Customer.Name": string;
-  "Product.Name": string;
-  Category: string;
-  Region: string;
-  Sales: number;
-  Profit: number;
+  [key: string]: any;
 };
 
 export default function OrdersPage() {
@@ -24,21 +19,22 @@ export default function OrdersPage() {
   const [sortBy, setSortBy] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const ordersPerPage = 10;
 
 
   useEffect(() => {
     async function fetchOrders() {
-       try {
+      try {
         setLoading(true);
+        setError("");
 
         const response = await fetch(
           "http://127.0.0.1:8000/orders?limit=100"
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch orders");
+          throw new Error("Failed to fetch orders.");
         }
 
         const data = await response.json();
@@ -49,7 +45,7 @@ export default function OrdersPage() {
           setError(data.message || "Unable to fetch orders.");
         }
       } catch (err) {
-        setError("Unable to connect to the backend.");
+        setError("Unable to fetch orders. Please check the backend.");
       } finally {
         setLoading(false);
       }
@@ -57,119 +53,89 @@ export default function OrdersPage() {
 
     fetchOrders();
   }, []);
+  
 
   const filteredAndSortedOrders = useMemo(() => {
     let result = [...orders];
 
-  // Search
-    if (search.trim()) {
-      const searchValue = search.toLowerCase();
-
-      result = result.filter(
-        (order) =>
-          String(order["Order.ID"]).toLowerCase().includes(searchValue) ||
-          String(order["Customer.Name"])
-            .toLowerCase()
-            .includes(searchValue) ||
-          String(order["Product.Name"])
-            .toLowerCase()
-            .includes(searchValue)
+  if (search.trim()) {
+      result = result.filter((order) =>
+        String(order["Customer.Name"] || "")
+          .toLowerCase()
+          .includes(search.toLowerCase())
       );
     }
 
-    // Region filter
     if (regionFilter) {
       result = result.filter(
-        (order) => order.Region === regionFilter
+        (order) =>
+          String(order["Region"] || "").toLowerCase() ===
+          regionFilter.toLowerCase()
       );
     }
 
-    // Category filter
     if (categoryFilter) {
       result = result.filter(
-        (order) => order.Category === categoryFilter
+        (order) =>
+          String(order["Category"] || "").toLowerCase() ===
+          categoryFilter.toLowerCase()
       );
     }
 
-    // Sorting
-    if (sortBy) {
-      result.sort((a, b) => {
-        let valueA: any = a[sortBy as keyof Order];
-        let valueB: any = b[sortBy as keyof Order];
+    result.sort((a, b) => {
+      const first = Number(a[sortBy] || 0);
+      const second = Number(b[sortBy] || 0);
 
-        if (typeof valueA === "number") {
-          return sortOrder === "asc"
-            ? valueA - valueB
-            : valueB - valueA;
-        }
-
-        return sortOrder === "asc"
-          ? String(valueA).localeCompare(String(valueB))
-          : String(valueB).localeCompare(String(valueA));
-      });
-    }
+      return sortOrder === "asc"
+        ? first - second
+        : second - first;
+    });
 
     return result;
-  }, [
-    orders,
-    search,
-    regionFilter,
-    categoryFilter,
-    sortBy,
-    sortOrder,
-  ]);
+  }, [orders, search, regionFilter, categoryFilter, sortBy, sortOrder]);
 
+  
   const totalPages = Math.ceil(
     filteredAndSortedOrders.length / ordersPerPage
   );
 
-  const startIndex = (currentPage - 1) * ordersPerPage;
-
-  const displayedOrders = filteredAndSortedOrders.slice(
-    startIndex,
-    startIndex + ordersPerPage
+  const paginatedOrders = filteredAndSortedOrders.slice(
+    (page - 1) * ordersPerPage,
+    page * ordersPerPage
   );
 
   const totalSales = orders.reduce(
-    (sum, order) => sum + Number(order.Sales || 0),
+    (sum, order) => sum + Number(order["Sales"] || 0),
     0
   );
 
   const totalProfit = orders.reduce(
-    (sum, order) => sum + Number(order.Profit || 0),
+    (sum, order) => sum + Number(order["Profit"] || 0),
     0
   );
 
-  const regions = [...new Set(orders.map((order) => order.Region))];
+  const totalOrders = orders.length;
 
-  const categories = [
-    ...new Set(orders.map((order) => order.Category)),
-  ];
+  const averageSales =
+    totalOrders > 0 ? totalSales / totalOrders : 0;
+
+  
+  useEffect(() => {
+    setPage(1);
+  }, [search, regionFilter, categoryFilter, sortBy, sortOrder]);
 
   const resetFilters = () => {
-    setSearch("");
-    setRegionFilter("");
-    setCategoryFilter("");
-    setSortBy("");
-    setSortOrder("asc");
-    setCurrentPage(1);
-  };
+  setSearch("");
+  setRegionFilter("");
+  setCategoryFilter("");
+  setSortBy("");
+  setSortOrder("asc");
+  setPage(1);
+};
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          color: "#794d6c",
-          fontSize: "24px",
-          fontWeight: "600",
-        }}
-      >
+      <div style={loadingStyle}>
         Loading Orders...
       </div>
     );
@@ -177,73 +143,29 @@ export default function OrdersPage() {
 
   if (error) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-          padding: "60px 40px",
-          color: "#DC2626",
-          fontSize: "20px",
-        }}
-      >
+      <div style={errorStyle}>
         {error}
       </div>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
-        padding: "60px 40px",
-        fontFamily: "Arial, sans-serif",
-        color: "#404e62",
-      }}
-    >
-      <section
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-        {/* Header */}
-        <h1
-          style={{
-            fontSize: "48px",
-            fontWeight: "800",
-            color: "#52465A",
-            marginBottom: "10px",
-          }}
-        >
-          📦 Orders
-        </h1>
+    <main style={pageStyle}>
+      <section style={containerStyle}>
 
-        <p
-          style={{
-            color: "#64748B",
-            fontSize: "18px",
-            marginBottom: "35px",
-          }}
-        >
-          Track and analyze customer orders and business activity.
+        
+        <h1 style={headingStyle}>📦 Orders</h1>
+
+        <p style={subtitleStyle}>
+          Track customer orders, sales, profit and order activity.
         </p>
 
-        {/* Summary Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(220px,1fr))",
-            gap: "20px",
-            marginBottom: "30px",
-          }}
-        >
+        
+        <div style={cardGridStyle}>
+
           <SummaryCard
             title="Total Orders"
-            value={orders.length.toLocaleString()}
+            value={totalOrders.toString()}
           />
 
           <SummaryCard
@@ -255,166 +177,111 @@ export default function OrdersPage() {
             title="Total Profit"
             value={`₹ ${totalProfit.toFixed(2)}`}
           />
+
+          <SummaryCard
+            title="Average Sales"
+            value={`₹ ${averageSales.toFixed(2)}`}
+          />
+
         </div>
 
-        {/* Controls */}
-        <div
-          style={{
-            background: "#FFFFFF",
-            padding: "22px",
-            borderRadius: "18px",
-            border: "1px solid #E5E7EB",
-            boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
-            marginBottom: "25px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              flexWrap: "wrap",
-            }}
+        
+        <div style={controlBoxStyle}>
+
+          <input
+            type="text"
+            placeholder="🔍 Search customer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={inputStyle}
+          />
+
+          <select
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            style={selectStyle}
           >
-            <input
-              type="text"
-              placeholder="🔍 Search orders..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
+            <option value="">All Regions</option>
+            <option value="East">East</option>
+            <option value="West">West</option>
+            <option value="Central">Central</option>
+            <option value="South">South</option>
+          </select>
+
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="">All Categories</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Technology">Technology</option>
+            <option value="Office Supplies">
+              Office Supplies
+            </option>
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="Sales">Sort by Sales</option>
+            <option value="Profit">Sort by Profit</option>
+          </select>
+
+          <button
+            onClick={() =>
+              setSortOrder(
+                sortOrder === "asc" ? "desc" : "asc"
+              )
+            }
+            style={buttonStyle}
+          >
+            {sortOrder === "asc" ? "↑ Ascending" : "↓ Descending"}
+          </button>
+
+          <button
+            onClick={resetFilters}
+             style={{
+              background: "#E5E7EB",
+              color: "#52465A",
+              border: "none",
+              padding: "11px 18px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "600",
               }}
-              style={inputStyle}
-            />
+        >
+          Reset
+        </button>
 
-            <select
-              value={regionFilter}
-              onChange={(e) => {
-                setRegionFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={inputStyle}
-            >
-              <option value="">All Regions</option>
-
-              {regions.map((region) => (
-                <option key={region} value={region}>
-                  {region}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={inputStyle}
-            >
-              <option value="">All Categories</option>
-
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              style={inputStyle}
-            >
-              <option value="">Sort By</option>
-              <option value="Sales">Sales</option>
-              <option value="Profit">Profit</option>
-              <option value="Region">Region</option>
-              <option value="Category">Category</option>
-            </select>
-
-            <button
-              onClick={() =>
-                setSortOrder(
-                  sortOrder === "asc" ? "desc" : "asc"
-                )
-              }
-              style={buttonStyle}
-            >
-              {sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
-            </button>
-
-            <button
-              onClick={resetFilters}
-              style={{
-                ...buttonStyle,
-                background: "#52465A",
-              }}
-            >
-              Reset
-            </button>
-          </div>
         </div>
 
-        {/* Table */}
-        <div
-          style={{
-            background: "#FFFFFF",
-            borderRadius: "18px",
-            padding: "20px",
-            border: "1px solid #E5E7EB",
-            boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
-            overflowX: "auto",
-          }}
-        >
-          {displayedOrders.length === 0 ? (
-            <div
-              style={{
-                padding: "50px",
-                textAlign: "center",
-                color: "#64748B",
-              }}
-            >
-              No matching orders found.
+        
+        <div style={tableContainerStyle}>
+
+          {paginatedOrders.length === 0 ? (
+            <div style={emptyStyle}>
+              No orders found.
             </div>
           ) : (
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                minWidth: "850px",
-              }}
-            >
-              <thead
-                style={{
-                  background: "#794d6c",
-                  color: "#FFFFFF",
-                }}
-              >
+            <table style={tableStyle}>
+
+              <thead style={tableHeadStyle}>
                 <tr>
-                  {[
-                    "Order ID",
-                    "Customer",
-                    "Product",
-                    "Category",
-                    "Region",
-                    "Sales",
-                    "Profit",
-                  ].map((heading) => (
-                    <th
-                      key={heading}
-                      style={{
-                        padding: "15px",
-                        textAlign: "center",
-                      }}
-                    >
-                      {heading}
-                    </th>
-                  ))}
+                  <th style={thStyle}>Order ID</th>
+                  <th style={thStyle}>Customer</th>
+                  <th style={thStyle}>Product</th>
+                  <th style={thStyle}>Category</th>
+                  <th style={thStyle}>Region</th>
+                  <th style={thStyle}>Sales</th>
+                  <th style={thStyle}>Profit</th>
                 </tr>
               </thead>
 
               <tbody>
-                {displayedOrders.map((order, index) => (
+                {paginatedOrders.map((order, index) => (
                   <tr
                     key={index}
                     style={{
@@ -424,93 +291,81 @@ export default function OrdersPage() {
                           : "#F8FAFC",
                     }}
                   >
-                    <td style={cellStyle}>
+                    <td style={tdStyle}>
                       {order["Order.ID"]}
                     </td>
 
-                    <td style={cellStyle}>
+                    <td style={tdStyle}>
                       {order["Customer.Name"]}
                     </td>
 
-                    <td style={cellStyle}>
+                    <td style={tdStyle}>
                       {order["Product.Name"]}
                     </td>
 
-                    <td style={cellStyle}>
-                      {order.Category}
+                    <td style={tdStyle}>
+                      {order["Category"]}
                     </td>
 
-                    <td style={cellStyle}>
-                      {order.Region}
-                    </td>
-
-                    <td
-                      style={{
-                        ...cellStyle,
-                        color: "#794d6c",
-                        fontWeight: "700",
-                      }}
-                    >
-                      ₹ {Number(order.Sales).toFixed(2)}
+                    <td style={tdStyle}>
+                      {order["Region"]}
                     </td>
 
                     <td
                       style={{
-                        ...cellStyle,
+                        ...tdStyle,
                         color: "#794d6c",
                         fontWeight: "700",
                       }}
                     >
-                      ₹ {Number(order.Profit).toFixed(2)}
+                      ₹ {Number(order["Sales"] || 0).toFixed(2)}
+                    </td>
+
+                    <td
+                      style={{
+                        ...tdStyle,
+                        color: "#794d6c",
+                        fontWeight: "700",
+                      }}
+                    >
+                      ₹ {Number(order["Profit"] || 0).toFixed(2)}
                     </td>
                   </tr>
                 ))}
               </tbody>
+
             </table>
           )}
+
         </div>
 
-        {/* Pagination */}
+        
         {totalPages > 1 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "15px",
-              marginTop: "25px",
-            }}
-          >
+          <div style={paginationStyle}>
+
             <button
-              disabled={currentPage === 1}
-              onClick={() =>
-                setCurrentPage((page) => page - 1)
-              }
-              style={buttonStyle}
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              style={paginationButtonStyle}
             >
               ← Previous
             </button>
 
-            <span
-              style={{
-                color: "#52465A",
-                fontWeight: "600",
-              }}
-            >
-              Page {currentPage} of {totalPages}
+            <span>
+              Page {page} of {totalPages}
             </span>
 
             <button
-              disabled={currentPage === totalPages}
-              onClick={() =>
-                setCurrentPage((page) => page + 1)
-              }
-              style={buttonStyle}
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+              style={paginationButtonStyle}
             >
               Next →
             </button>
+
           </div>
         )}
+
       </section>
     </main>
   );
@@ -524,44 +379,91 @@ function SummaryCard({
   value: string;
 }) {
   return (
-    <div
-      style={{
-        background: "#FFFFFF",
-        borderRadius: "18px",
-        padding: "24px",
-        border: "1px solid #E5E7EB",
-        boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
-      }}
-    >
-      <h3
-        style={{
-          color: "#64748B",
-          marginBottom: "10px",
-        }}
-      >
-        {title}
-      </h3>
-
-      <h2
-        style={{
-          color: "#794d6c",
-          fontSize: "30px",
-          fontWeight: "700",
-        }}
-      >
-        {value}
-      </h2>
+    <div style={summaryCardStyle}>
+      <h3 style={summaryTitleStyle}>{title}</h3>
+      <h2 style={summaryValueStyle}>{value}</h2>
     </div>
   );
 }
 
-const inputStyle = {
-  padding: "11px 14px",
-  borderRadius: "9px",
-  border: "1px solid #E5E7EB",
-  background: "#FFFFFF",
+
+const pageStyle = {
+  minHeight: "100vh",
+  background:
+    "linear-gradient(to bottom, #F8FAFC 0%, #EEF2FF 100%)",
+  padding: "60px 40px",
+  fontFamily: "Arial, sans-serif",
   color: "#404e62",
-  minWidth: "180px",
+};
+
+const containerStyle = {
+  maxWidth: "1200px",
+  margin: "0 auto",
+};
+
+const headingStyle = {
+  fontSize: "48px",
+  fontWeight: "800",
+  color: "#52465A",
+  marginBottom: "10px",
+};
+
+const subtitleStyle = {
+  fontSize: "18px",
+  color: "#64748B",
+  marginBottom: "35px",
+  lineHeight: "30px",
+};
+
+const cardGridStyle = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(220px,1fr))",
+  gap: "24px",
+  marginBottom: "35px",
+};
+
+const summaryCardStyle = {
+  background: "#FFFFFF",
+  borderRadius: "18px",
+  padding: "24px",
+  border: "1px solid #E5E7EB",
+  boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+};
+
+const summaryTitleStyle = {
+  color: "#64748B",
+  marginBottom: "10px",
+};
+
+const summaryValueStyle = {
+  color: "#794d6c",
+  fontSize: "28px",
+  fontWeight: "700",
+};
+
+const controlBoxStyle = {
+  background: "#FFFFFF",
+  borderRadius: "18px",
+  padding: "20px",
+  boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+  display: "flex",
+  gap: "12px",
+  flexWrap: "wrap" as const,
+  marginBottom: "30px",
+};
+
+const inputStyle = {
+  padding: "11px",
+  borderRadius: "8px",
+  border: "1px solid #E5E7EB",
+  minWidth: "220px",
+};
+
+const selectStyle = {
+  padding: "11px",
+  borderRadius: "8px",
+  border: "1px solid #E5E7EB",
 };
 
 const buttonStyle = {
@@ -569,13 +471,76 @@ const buttonStyle = {
   color: "#FFFFFF",
   border: "none",
   padding: "11px 18px",
-  borderRadius: "9px",
+  borderRadius: "8px",
   cursor: "pointer",
   fontWeight: "600",
 };
 
-const cellStyle = {
-  padding: "13px",
+const tableContainerStyle = {
+  background: "#FFFFFF",
+  borderRadius: "18px",
+  padding: "20px",
+  boxShadow: "0 15px 40px rgba(15,23,42,0.08)",
+  overflowX: "auto" as const,
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse" as const,
+  minWidth: "850px",
+};
+
+const tableHeadStyle = {
+  background: "#794d6c",
+  color: "#FFFFFF",
+};
+
+const thStyle = {
+  padding: "14px",
   textAlign: "center" as const,
-  color: "#404e62",
+};
+
+const tdStyle = {
+  padding: "14px",
+  textAlign: "center" as const,
+};
+
+const paginationStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "20px",
+  marginTop: "25px",
+};
+
+const paginationButtonStyle = {
+  background: "#794d6c",
+  color: "#FFFFFF",
+  border: "none",
+  padding: "10px 18px",
+  borderRadius: "8px",
+  cursor: "pointer",
+};
+
+const loadingStyle = {
+  minHeight: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#794d6c",
+  fontSize: "24px",
+  fontWeight: "600",
+};
+
+const errorStyle = {
+  minHeight: "100vh",
+  padding: "60px 40px",
+  color: "#DC2626",
+  fontSize: "20px",
+};
+
+const emptyStyle = {
+  padding: "50px",
+  textAlign: "center" as const,
+  color: "#64748B",
 };
