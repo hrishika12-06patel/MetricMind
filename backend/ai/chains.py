@@ -12,11 +12,21 @@ except ImportError:
 
 @lru_cache(maxsize=1)
 def get_summary_chain():
-    """Build the reusable LCEL chain for general business summaries."""
+    """
+    Build and cache the reusable LCEL pipeline for general dataset business summaries.
+
+    Returns:
+        Runnable: Combined LangChain chain (Prompt | Gemini LLM | OutputParser).
+    """
     return DATASET_SUMMARY_PROMPT | get_llm() | StrOutputParser()
 
 
 @lru_cache(maxsize=1)
 def get_order_summary_chain():
-    """Build the reusable LCEL chain for order-specific summaries."""
+    """
+    Build and cache the reusable LCEL pipeline for order-specific metric analysis.
+
+    Returns:
+        Runnable: Combined LangChain chain (Order Prompt | Gemini LLM | OutputParser).
+    """
     return ORDER_ANALYSIS_PROMPT | get_llm() | StrOutputParser()

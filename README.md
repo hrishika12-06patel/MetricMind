@@ -223,46 +223,79 @@ MetricMind
 ---
 ## AI Module
 
-MetricMind includes an AI-powered Business Intelligence module built using **LangChain** and **OpenAI**.
+MetricMind includes a production-ready AI Business Intelligence module built using **LangChain LCEL (LangChain Expression Language)** and **Google Gemini LLM** (`ChatGoogleGenerativeAI`).
 
-### Features
-
-- LangChain integration for AI-powered insights
-- Modular AI architecture with separate service layer
-- Prompt templates for business-focused responses
-- Dataset summarization using natural language
-- FastAPI endpoint for AI insight generation
-- Environment-based API key configuration
+### Overview & Capabilities
+- **Automated Dataset Summarization**: Analyzes sales, order metrics, or financial data streams and generates structured markdown executive summaries.
+- **Modular Service Layer**: Decoupled service (`AIInsightService`) reusable by any current or future backend route.
+- **LangChain LCEL Chains**: Modular prompt templates (`DATASET_SUMMARY_PROMPT`, `ORDER_ANALYSIS_PROMPT`) connected via LCEL pipelines.
+- **Primary Endpoint**: `POST /ai/summary` accepts both raw text data and structured metric objects.
 
 ### AI Module Structure
 
 ```text
 backend/
 └── ai/
-    ├── config.py
-    ├── llm_factory.py
-    ├── prompt_templates.py
-    ├── chains.py
-    ├── insight_service.py
-    ├── routes.py
-    └── test_ai.py
+    ├── config.py             # Environment configuration & dotenv loading
+    ├── llm_factory.py        # LangChain ChatGoogleGenerativeAI factory
+    ├── prompt_templates.py   # Business Intelligence & Order prompt templates
+    ├── chains.py             # LangChain LCEL chains
+    ├── insight_service.py    # Service layer (AIInsightService)
+    ├── routes.py             # FastAPI route handlers (/ai/summary)
+    └── test_ai.py            # Automated test suite (9 test cases)
 ```
 
-### AI Endpoint
+### Required Environment Variables
 
-```
-POST /ai/summarize
-```
+Configure `.env` in project root (`MetricMind/.env`):
 
-### Example Request
-
-```json
-{
-  "dataset": "Sales: 100, 200, 300\nProfit: 20, 40, 50"
-}
+```env
+GOOGLE_API_KEY=your_google_gemini_api_key_here
+MODEL_NAME=gemini-2.5-flash
 ```
 
-> **Note:** A valid OpenAI API key must be configured in the `.env` file before using the AI endpoint.
+### Quick Start & Usage Guide
+
+1. **Install Backend Dependencies**:
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
+
+2. **Start Backend Server**:
+   ```bash
+   python -m uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
+   ```
+
+3. **Access Interactive Swagger Documentation**:
+   Navigate to: `http://127.0.0.1:8000/docs`
+
+4. **Run AI Test Suite**:
+   ```bash
+   python -m ai.test_ai
+   ```
+
+5. **Call Primary AI Summary Endpoint**:
+   ```http
+   POST /ai/summary
+   Content-Type: application/json
+
+   {
+     "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
+     "data_type": "sales"
+   }
+   ```
+
+   **Sample Response**:
+   ```json
+   {
+     "success": true,
+     "summary": "AI-generated business insights...",
+     "data_type": "sales"
+   }
+   ```
+
+> **Security Note:** Never commit API keys or `.env` files to source control. Use `.env.example` as a safe placeholder template.
+
 ---
 
 # Running the Backend
@@ -482,4 +515,3 @@ Testing files:
 # License
 
 Developed as part of the **Axlero Solutions Data Analytics Internship**.
-
