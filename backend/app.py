@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # Add backend and project root directories to sys.path
 BASE_DIR = Path(__file__).resolve().parent
@@ -55,8 +56,6 @@ app = FastAPI(
         "name": "MetricMind Team"
     }
 )
-
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 @app.exception_handler(RequestValidationError)
 async def ai_request_validation_exception_handler(request, exc: RequestValidationError):
