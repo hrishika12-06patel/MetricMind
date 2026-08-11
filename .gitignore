@@ -1,6 +1,12 @@
 venv/
-__pycache__/
-*.pyc
-.env
 node_modules/
 .DS_Store
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]

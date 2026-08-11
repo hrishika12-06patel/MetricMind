@@ -6,16 +6,16 @@ except ImportError:
     from .config import AI_REQUEST_TIMEOUT_SECONDS, MODEL_NAME, get_google_api_key
 
 
-def get_llm(model_name: str | None = None, temperature: float = 0.2):
+def get_llm(model_name: str | None = None, temperature: float = 0.2) -> ChatGoogleGenerativeAI:
     """
-    Creates and returns the configured Gemini LLM instance using LangChain.
+    Construct and return the configured ChatGoogleGenerativeAI model instance using LangChain.
 
     Args:
-        model_name (str, optional): Custom Gemini model name. Defaults to configured MODEL_NAME.
-        temperature (float, optional): Sampling temperature. Defaults to 0.2.
+        model_name: Name of target Gemini model (e.g. 'gemini-2.5-flash'). Defaults to MODEL_NAME.
+        temperature: Sampling temperature for output generation. Defaults to 0.2 for analytical consistency.
 
     Returns:
-        ChatGoogleGenerativeAI: Configured LangChain Chat model instance.
+        ChatGoogleGenerativeAI: Initialized LangChain chat model.
     """
     target_model = model_name or MODEL_NAME
     return ChatGoogleGenerativeAI(

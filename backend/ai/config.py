@@ -22,11 +22,18 @@ class AIConfigurationError(RuntimeError):
 
 
 def get_google_api_key() -> str:
-    """Return the configured Gemini key, or a safe actionable configuration error.
+    """
+    Retrieve the configured Gemini API key, or raise an actionable configuration error.
 
-    This check deliberately happens when an AI request is made rather than while
-    importing the FastAPI app. The non-AI MetricMind endpoints can therefore run
-    during local development even if AI credentials are not configured.
+    This check is executed dynamically when an AI request is initiated rather than during
+    application startup, allowing non-AI backend endpoints to operate normally even if
+    credentials are not set.
+
+    Returns:
+        str: Configured GOOGLE_API_KEY string.
+
+    Raises:
+        AIConfigurationError: If GOOGLE_API_KEY environment variable is missing or blank.
     """
     api_key = os.getenv("GOOGLE_API_KEY", "").strip()
     if not api_key:

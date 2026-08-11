@@ -131,15 +131,15 @@ class AIInsightService:
         question: Optional[str] = None
     ) -> str:
         """
-        Generates an AI summary for business data.
+        Generate AI-powered business insights from sales or order data.
 
         Args:
-            data (Union[str, list, dict]): Sales, order, or custom dataset.
-            data_type (str): Type of dataset (e.g., 'sales', 'orders', 'financial').
-            question (str, optional): Custom prompt or question. Defaults to automatic summary prompt.
+            data: Sales/order data supplied to the AI service (string, list, or dict).
+            data_type: Type of business data being analyzed (e.g. 'sales', 'orders').
+            question: Optional specific query objective or custom prompt target.
 
         Returns:
-            str: AI-generated business summary in Markdown format.
+            AI-generated business summary and actionable insights in Markdown format.
         """
         formatted_data = cls._format_data(data)
         query_prompt = question or f"Summarize key insights, metrics, trends, and recommendations for this {data_type} dataset."
@@ -171,13 +171,13 @@ class AIInsightService:
         orders_data: Union[str, List[Any], Dict[str, Any]]
     ) -> str:
         """
-        Generates targeted AI business insights specifically for order datasets.
+        Generate targeted AI business insights specifically for order datasets.
 
         Args:
-            orders_data (Union[str, list, dict]): Order records or order metrics.
+            orders_data: Order records or aggregated order metrics (string, list, or dict).
 
         Returns:
-            str: Business insights for orders.
+            AI-generated business summary and operational recommendations for orders.
         """
         formatted_orders = cls._format_data(orders_data)
 
@@ -197,18 +197,19 @@ class AIInsightService:
         segment: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Fetches live order records from SQLite database, computes aggregated metrics,
-        and generates an AI business summary using LangChain.
+        Fetch live order records from SQLite database, compute aggregated metrics,
+        and generate an AI business summary using LangChain.
 
         Args:
-            db_session: SQLAlchemy Session instance
-            region (str, optional): Region filter
-            category (str, optional): Category filter
-            segment (str, optional): Segment filter
+            db_session: Active SQLAlchemy database session.
+            region: Optional region filter (e.g., 'East', 'West').
+            category: Optional category filter (e.g., 'Technology', 'Furniture').
+            segment: Optional segment filter (e.g., 'Consumer', 'Corporate').
 
         Returns:
-            dict: Aggregated metrics & AI summary markdown
+            Dict[str, Any]: Dictionary containing calculated metrics and AI summary text.
         """
+
         try:
             from database import get_all_orders
         except ImportError:
@@ -267,4 +268,3 @@ class AIInsightService:
 
 # Class alias for convenient importing
 InsightService = AIInsightService
-
