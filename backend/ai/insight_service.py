@@ -66,21 +66,44 @@ class AIInsightService:
             )
         return formatted
 
+    @staticmethod
+    def _extract_text(response: Any) -> str:
+        """Extract only text content from a LangChain AI response."""
+        if isinstance(response, str):
+            return response
+
+        if isinstance(response, list):
+            text_parts = []
+
+            for item in response:
+                if isinstance(item, dict) and item.get("type") == "text":
+                    text = item.get("text", "")
+                    if text:
+                        text_parts.append(text)
+
+            extracted = "\n".join(text_parts).strip()
+            if extracted:
+                return extracted
+
+        return str(response).strip()
+
     @classmethod
-    def _invoke_with_retry(cls, chain: Any, input_data: Dict[str, Any], max_retries: int = 1) -> str:
+    def _invoke_with_retry(cls, chain: Any, input_data: Dict[str, Any], max_retries: int = 2) -> str:
         """
         Invokes a LangChain chain with retry logic for transient API issues.
         """
         last_error = None
         for attempt in range(1, max_retries + 1):
             try:
-                return chain.invoke(input_data)
+                response = chain.invoke(input_data)
+                return cls._extract_text(response)
             except AIConfigurationError:
                 raise
             except Exception as e:
                 err_msg = cls._sanitize_error_msg(str(e))
+                logger.error("Actual AI provider error: %s", err_msg)
                 # Fail fast on auth, bad key, or provider deadline errors without waiting for multiple retries
-                if any(k in err_msg for k in ["API_KEY_INVALID", "UNAUTHENTICATED", "401", "API key not valid", "API_KEY_SERVICE_BLOCKED", "INVALID_ARGUMENT", "400", "504", "DEADLINE_EXHAUSTED"]):
+                if any(k in err_msg for k in ["API_KEY_INVALID", "UNAUTHENTICATED", "401", "API key not valid", "API_KEY_SERVICE_BLOCKED", ]):
                     logger.error("AI provider authentication, key validation, or deadline failed.")
                     raise AIConfigurationError("Invalid GOOGLE_API_KEY configuration or AI service unavailable.") from e
                 if "RESOURCE_EXHAUSTED" in err_msg or "429" in err_msg or "Quota exceeded" in err_msg:
@@ -90,8 +113,15 @@ class AIInsightService:
                 last_error = e
                 if attempt < max_retries:
                     time.sleep(1.0 * attempt)
-        logger.error("AI provider failed after %s attempt(s)", max_retries)
-        raise AIProviderError("The AI provider is temporarily unavailable. Please try again.") from last_error
+        logger.error(
+            "AI provider failed after %s attempt(s): %s",
+            max_retries,
+            cls._sanitize_error_msg(str(last_error)),
+        )
+
+        raise AIProviderError(
+            f"AI provider failed: {cls._sanitize_error_msg(str(last_error))}"
+        ) from last_error
 
     @classmethod
     def generate_summary(
