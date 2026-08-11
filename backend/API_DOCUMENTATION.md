@@ -458,48 +458,59 @@ GET /orders?sort_by=Sales&order=desc
 
 ## 10.1 Primary AI Summary Endpoint
 
-### Endpoint
-
-```http
-POST /ai/summary
-Content-Type: application/json
-```
+### Endpoint Details
+- **Endpoint**: `/ai/summary`
+- **HTTP Method**: `POST`
+- **Content-Type**: `application/json`
 
 ### Purpose
 
 Generates a structured AI business intelligence summary from sales, financial, or order datasets using **LangChain** and **Google Gemini LLM**. Accepts formatted text, structured JSON records, or aggregated metric dictionaries.
 
-### Request Body (`AISummaryRequest`)
+### Request Contract (`AISummaryRequest`)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `data` | String \| Object \| Array | Yes (or `dataset`) | Sales or order data to summarize |
-| `dataset` | String \| Object \| Array | Yes (or `data`) | Alias for `data` |
-| `data_type` | String | No (Default: `"sales"`) | Type of dataset (`"sales"`, `"orders"`, `"financial"`) |
-| `question` | String | No | Custom prompt objective or question |
+```json
+{
+  "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
+  "data_type": "sales"
+}
+```
+
+#### Field Specifications:
+
+| Field | Type | Required | Allowed Values / Restrictions | Description |
+|-------|------|----------|-------------------------------|-------------|
+| `data` | String \| Object \| Array | Yes (or `dataset`) | Non-empty formatted string, object dictionary, or array of record dicts. Maximum 50,000 characters. | Dataset content to analyze (sales text, order metrics, financial records). |
+| `dataset` | String \| Object \| Array | Yes (or `data`) | Same as `data`. | Alias for `data` field. |
+| `data_type` | String | Optional (Default: `"sales"`) | `"sales"`, `"orders"`, `"financial"`, or any custom dataset identifier string. | Category or domain type of the input data. |
+| `question` | String | Optional | Any custom text string focus objective. | Custom analytical question or specific objective for the AI service. |
+
+#### Detailed Schema Notes:
+- **What `data` represents**: The raw or aggregated business metric dataset supplied to the AI. For sales, this is typically formatted sales/profit figures or revenue tables. For orders, this can be an order metrics object (total_orders, total_sales, AOV) or a list of order records.
+- **Sales and Orders Uniformity**: Both Sales and Orders datasets use the **exact same request structure** (`data` field). You differentiate between them using the `data_type` parameter (e.g. `"sales"` vs `"orders"`).
 
 ### Sample Request A: Sales Dataset (Raw Formatted Text)
 
 ```json
 {
-    "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
-    "data_type": "sales"
+  "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
+  "data_type": "sales"
 }
 ```
 
-### Sample Request B: Orders Dataset (JSON Object)
+### Sample Request B: Orders Dataset (JSON Metrics Object)
 
 ```json
 {
-    "data": {
-        "total_orders": 1250,
-        "total_sales": 345000.75,
-        "total_profit": 48200.50,
-        "top_category": "Technology",
-        "underperforming_category": "Furniture"
-    },
-    "data_type": "orders",
-    "question": "Provide key executive summary and actionable recommendations."
+  "data": {
+    "total_orders": 1250,
+    "total_sales": 345000.75,
+    "total_profit": 48200.50,
+    "top_category": "Technology",
+    "underperforming_category": "Furniture"
+  },
+  "data_type": "orders",
+  "question": "Analyze order performance and suggest optimizations."
 }
 ```
 
@@ -507,14 +518,29 @@ Generates a structured AI business intelligence summary from sales, financial, o
 
 ```json
 {
-    "success": true,
-    "summary": "# Business Intelligence Report: MetricMind Orders Analysis\n\n## 1. Executive Summary\nDuring the evaluated period, MetricMind generated **$345,000.75** in total sales...",
-    "data_type": "orders",
-    "message": "AI summary generated successfully."
+  "success": true,
+  "summary": "AI-generated business insights...",
+  "data_type": "sales"
+}
+```
+
+*Full response schema output:*
+```json
+{
+  "success": true,
+  "summary": "# Business Intelligence Summary\n\n## Executive Summary\nMetricMind sales performance demonstrates strong upward trajectory...",
+  "data_type": "sales",
+  "message": "AI summary generated successfully.",
+  "data": {
+    "data_type": "sales",
+    "summary": "# Business Intelligence Summary\n...",
+    "question": null
+  }
 }
 ```
 
 ---
+
 
 ## 10.2 Frontend Integration Contract
 

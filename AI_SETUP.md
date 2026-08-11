@@ -102,22 +102,21 @@ To start the FastAPI server with AI routes enabled:
 .\.venv\Scripts\python.exe -m uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The server runs locally at: `http://127.0.0.1:8000`  
+The server runs locally at: `http://127.0.0.1:8000`
 Interactive Swagger API documentation: `http://127.0.0.1:8000/docs`
 
 ---
 
 ## API Endpoints
 
-### 1. `POST /ai/summarize`
-Generates a business intelligence summary for general sales or custom dataset strings/objects.
+### 1. `POST /ai/summary` (Primary Endpoint)
+Generates a business intelligence summary for general sales or order dataset strings/objects. Also accessible via alias `POST /ai/summarize`.
 
 **Request Body:**
 ```json
 {
-  "dataset": "Sales: 120,500, Profit: 24,100\nCategory: Technology",
-  "data_type": "sales",
-  "question": "Summarize key profit drivers and recommendations."
+  "data": "Sales: 120,340,280,560,410\nProfit: 20,55,45,120,70",
+  "data_type": "sales"
 }
 ```
 
@@ -125,16 +124,13 @@ Generates a business intelligence summary for general sales or custom dataset st
 ```json
 {
   "success": true,
-  "message": "AI summary generated successfully.",
-  "summary": "# Business Intelligence Report...",
-  "data": {
-    "data_type": "sales",
-    "summary": "# Business Intelligence Report..."
-  }
+  "summary": "AI-generated business insights...",
+  "data_type": "sales"
 }
 ```
 
 ---
+
 
 ### 2. `POST /ai/summarize-orders`
 Generates business insights specifically tailored for order dataset records or aggregated metrics.
@@ -240,4 +236,3 @@ ALL AI TESTS PASSED SUCCESSFULLY! AI WORKFLOW OPERATIONAL.
 - **Virtual Environment**: Use `.\.venv\Scripts\python.exe` when executing scripts or backend servers to ensure all required packages (`langchain-core`, `langchain-google-genai`) are available.
 - **API Key Missing**: Ensure `.env` is located at `MetricMind/.env` and contains a valid `GOOGLE_API_KEY`.
 - **Retry Logic**: `AIInsightService` includes built-in retry handling for transient Google API network resets.
-
