@@ -21,7 +21,6 @@ def get_llm(model_name: str | None = None, temperature: float = 0.2) -> ChatGoog
     return ChatGoogleGenerativeAI(
         model=target_model,
         google_api_key=get_google_api_key(),
-        temperature=temperature,
         timeout=AI_REQUEST_TIMEOUT_SECONDS,
         # Retry behavior is owned by AIInsightService so every endpoint has
         # consistent retry and error handling.
