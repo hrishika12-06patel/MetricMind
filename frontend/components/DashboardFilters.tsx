@@ -1,4 +1,18 @@
-export default function DashboardFilters() {
+export default function DashboardFilters({
+  region,
+  category,
+  segment,
+  setRegion,
+  setCategory,
+  setSegment,
+}: {
+  region: string;
+  category: string;
+  segment: string;
+  setRegion: (value: string) => void;
+  setCategory: (value: string) => void;
+  setSegment: (value: string) => void;
+}) {
   return (
     <div
       style={{
@@ -41,6 +55,8 @@ export default function DashboardFilters() {
 
         {/* Region */}
         <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           style={{
             width: "140px",
             height: "46px",
@@ -53,11 +69,9 @@ export default function DashboardFilters() {
             fontWeight: "500",
             cursor: "pointer",
           }}
-          defaultValue=""
+
         >
-          <option value="" disabled>
-            Region
-          </option>
+          <option value="">Region</option>
           <option>East</option>
           <option>West</option>
           <option>South</option>
@@ -66,6 +80,8 @@ export default function DashboardFilters() {
 
         {/* Category */}
         <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           style={{
             width: "150px",
             height: "46px",
@@ -78,11 +94,9 @@ export default function DashboardFilters() {
             fontWeight: "500",
             cursor: "pointer",
           }}
-          defaultValue=""
+        
         >
-          <option value="" disabled>
-            Category
-          </option>
+          <option value="">Category</option>
           <option>Furniture</option>
           <option>Technology</option>
           <option>Office Supplies</option>
@@ -90,6 +104,8 @@ export default function DashboardFilters() {
 
         {/* Segment */}
         <select
+          value={segment}
+          onChange={(e) => setSegment(e.target.value)}
           style={{
             width: "150px",
             height: "46px",
@@ -102,11 +118,9 @@ export default function DashboardFilters() {
             fontWeight: "500",
             cursor: "pointer",
           }}
-          defaultValue=""
+        
         >
-          <option value="" disabled>
-            Segment
-          </option>
+          <option value="">Segment</option>
           <option>Consumer</option>
           <option>Corporate</option>
           <option>Home Office</option>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -12,44 +13,117 @@ import {
   LabelList,
 } from "recharts";
 
-const data = [
-  { month: "Jan", sales: 4000 },
-  { month: "Feb", sales: 3000 },
-  { month: "Mar", sales: 5000 },
-  { month: "Apr", sales: 4500 },
-  { month: "May", sales: 6000 },
-  { month: "Jun", sales: 7000 },
-];
+interface SalesData {
+  year: number;
+  total_sales: number;
+}
 
 export default function SalesTrendChart() {
+  const [data, setData] = useState<SalesData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    async function fetchSalesTrend() {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const response = await fetch(
+          "http://127.0.0.1:8000/sales/by-year"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch sales trend");
+        }
+
+        const result = await response.json();
+
+        const chartData = Array.isArray(result.data)
+          ? result.data
+              .map((item: SalesData) => ({
+                year: Number(item.year),
+                total_sales: Number(item.total_sales) || 0,
+              }))
+              .sort((a: SalesData, b: SalesData) => a.year - b.year)
+          : [];
+
+        setData(chartData);
+      } catch (err) {
+        console.error("Sales trend error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSalesTrend();
+  }, []);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#2a3036",
+        }}
+      >
+        Loading sales data...
+      </div>
+    );
+  }
+
+  if (error || data.length === 0) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#30343c",
+        }}
+      >
+        Unable to load sales data.
+      </div>
+    );
+  }
+
   return (
-    <ResponsiveContainer width="100%" height={340}>
+    <ResponsiveContainer width="100%" height="100%">
       <LineChart
         data={data}
         margin={{
-          top: 70,
-          right: 30,
-          left: 20,
-          bottom: 50,
+          top: 25,
+          right: 20,
+          left: 10,
+          bottom: 20,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
 
         <XAxis
-        dataKey="month"
-        tick={{ fontSize: 12 }}
-        height={40}
+          dataKey="year"
+          tick={{ fontSize: 14 }}
+          tickMargin={8}
         />
-        
 
         <YAxis
-          width={45}
-          tick={{ fontSize: 11 }}
-          
+          width={65}
+          tick={{ fontSize: 14 }}
+          tickFormatter={(value) =>
+            `₹${(Number(value) / 1000000).toFixed(1)}M`
+          }
         />
 
         <Tooltip
-          formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Sales"]}
+          formatter={(value) => [
+            `₹${Number(value).toLocaleString("en-IN")}`,
+            "Sales",
+          ]}
         />
 
         <Legend
@@ -60,20 +134,24 @@ export default function SalesTrendChart() {
 
         <Line
           type="monotone"
-          dataKey="sales"
-          stroke="#2563eb"
+          dataKey="total_sales"
+          name="Sales"
+          stroke="#eb2577"
           strokeWidth={3}
           dot={{ r: 5 }}
+          activeDot={{ r: 7 }}
         >
           <LabelList
-            dataKey="sales"
+            dataKey="total_sales"
             position="top"
-            offset={18}
+            offset={8}
+            formatter={(value) =>
+              `₹${(Number(value) / 1000000).toFixed(1)}M`
+            }
             style={{
-                fontSize: 11,
-                fill: "#666",
+              fontSize: 11,
+              fill: "#1a1f26",
             }}
-            
           />
         </Line>
       </LineChart>
