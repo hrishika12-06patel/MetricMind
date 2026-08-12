@@ -35,7 +35,7 @@ export default function Dashboard() {
   const [totalOrders, setTotalOrders] = useState(0);
 
   
-  const [totalCustomers] = useState<number | null>(null);
+  const [totalCustomers, setTotalCustomers] = useState(0);
 
   const [orders, setOrders] = useState<any[]>([]);
 
@@ -110,6 +110,19 @@ export default function Dashboard() {
         setTotalSales(Number(stats.total_sales) || 0);
         setTotalProfit(Number(stats.total_profit) || 0);
         setTotalOrders(Number(stats.total_orders) || 0);
+        const customersRes = await fetch(
+         `${API_BASE_URL}/customers/count`
+        );
+
+        if (!customersRes.ok) {
+         throw new Error("Failed to fetch customer count");
+        }
+
+        const customersData = await customersRes.json();
+
+        setTotalCustomers(
+         Number(customersData.total_customers) || 0
+        );
       } catch (error) {
         console.error("Dashboard loading error:", error);
 
@@ -118,6 +131,7 @@ export default function Dashboard() {
         setTotalSales(0);
         setTotalProfit(0);
         setTotalOrders(0);
+        setTotalCustomers(0);
       } finally {
         setIsLoading(false);
       }
@@ -151,13 +165,10 @@ export default function Dashboard() {
     },
     {
       title: "Customers",
-      value:
-        totalCustomers === null
-          ? "—"
-          : totalCustomers.toLocaleString("en-IN"),
+      value: totalCustomers.toLocaleString("en-IN"),
       icon: "👥",
       iconBackground: "#ffedd5",
-      valueColor: "rgb(42, 66, 95)",
+      valueColor: "rgb(120, 5, 124)",
     },
   ];
 
