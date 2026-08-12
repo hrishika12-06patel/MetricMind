@@ -1,6 +1,30 @@
-export default function SortingDropdown() {
+export default function SortingDropdown({
+  sortBy,
+  order,
+  setSortBy,
+  setOrder,
+}: {
+  sortBy: string;
+  order: string;
+  setSortBy: (value: string) => void;
+  setOrder: (value: string) => void;
+}) {
+  const handleChange = (value: string) => {
+    if (value === "") {
+      setSortBy("");
+      return;
+    }
+
+    const [field, direction] = value.split("-");
+
+    setSortBy(field);
+    setOrder(direction);
+  };
+
   return (
     <select
+      value={sortBy ? `${sortBy}-${order}` : ""}
+      onChange={(e) => handleChange(e.target.value)}
       style={{
         background: "#ffffff",
         color: "#374151",
@@ -13,22 +37,15 @@ export default function SortingDropdown() {
         cursor: "pointer",
         outline: "none",
         boxShadow: "0 8px 20px rgba(0,0,0,.05)",
-        transition: "all .25s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow =
-          "0 12px 25px rgba(124,58,237,.15)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow =
-          "0 8px 20px rgba(0,0,0,.05)";
       }}
     >
-      <option>↕ Sort By</option>
-      <option>Sales (High → Low)</option>
-      <option>Sales (Low → High)</option>
-      <option>Profit</option>
-      <option>Orders</option>
+      <option value="">↕ Sort By</option>
+      <option value="Sales-desc">Sales (High → Low)</option>
+      <option value="Sales-asc">Sales (Low → High)</option>
+      <option value="Profit-desc">Profit (High → Low)</option>
+      <option value="Profit-asc">Profit (Low → High)</option>
+      <option value="Region-asc">Region (A → Z)</option>
+      <option value="Category-asc">Category (A → Z)</option>
     </select>
   );
 }
