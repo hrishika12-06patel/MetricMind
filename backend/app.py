@@ -28,6 +28,8 @@ from database import (
     get_all_orders,
     get_db,
     test_connection,
+    get_profit_by_year,
+    get_unique_customer_count,
 )
 from db_stats import (
     get_dashboard_stats,
@@ -38,6 +40,7 @@ from db_stats import (
     get_sales_by_region,
     get_sales_by_year,
     get_top_products,
+    
 )
 
 @asynccontextmanager
@@ -496,3 +499,13 @@ def top_products(db: Session = Depends(get_db)):
             "success": False,
             "message": str(e)
         }
+
+@app.get("/reports/profit-by-year", tags=["Reports"])
+def profit_by_year(db: Session = Depends(get_db)):
+    return get_profit_by_year(db)
+
+@app.get("/customers/count", tags=["Dashboard"])
+def unique_customer_count(db: Session = Depends(get_db)):
+    return {
+        "total_customers": get_unique_customer_count(db)
+    }

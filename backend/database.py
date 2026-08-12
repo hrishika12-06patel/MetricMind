@@ -7,6 +7,7 @@ import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
 
 # ─── Database Configuration ───────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -117,4 +118,33 @@ def calculate_total_profit(db):
         return row._mapping["total_profit"] or 0
     except Exception as e:
         print(f"[ERROR] Error calculating profit: {e}")
-        return 0
+        return 0
+
+def get_profit_by_year(db):
+    query = """
+        SELECT 
+            strftime('%Y', "Order.Date") AS year,
+            SUM("Profit") AS total_profit
+        FROM orders
+        GROUP BY strftime('%Y', "Order.Date")
+        ORDER BY year
+    """
+    result = db.execute(text(query)).fetchall()
+
+    return [
+        {
+            "year": row[0],
+            "total_profit": round(float(row[1] or 0), 2)
+        }
+        for row in result
+    ]
+
+
+def get_unique_customer_count(db):
+    query = """
+        SELECT COUNT(DISTINCT "Customer.ID")
+        FROM orders
+    """
+    result = db.execute(text(query)).scalar()
+
+    return int(result or 0)
