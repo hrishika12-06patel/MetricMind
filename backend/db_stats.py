@@ -29,6 +29,14 @@ def get_dashboard_stats(db: Session) -> dict:
             FROM Orders
         """))
         row = result.fetchone()
+        if row is None:
+            return {
+                "total_orders": 0,
+                "total_sales": 0.0,
+                "total_profit": 0.0,
+                "avg_sales": 0.0,
+                "avg_profit": 0.0
+            }
         return {
             "total_orders": row[0] or 0,
             "total_sales": round(float(row[1]), 2),
@@ -49,33 +57,101 @@ def get_dashboard_stats(db: Session) -> dict:
 
 # ─── Sales Statistics ─────────────────────────────────────
 
-def get_sales_by_region(db: Session) -> list:
-    """Get total sales grouped by region."""
+def get_sales_by_region(
+    db: Session,
+    region: str | None = None,
+    category: str | None = None,
+    segment: str | None = None
+) -> list:
+    """Get total sales grouped by region with optional filters."""
+
     try:
-        result = db.execute(text("""
-            SELECT Region, COALESCE(SUM(Sales), 0) as total_sales
+        query = """
+            SELECT Region, COALESCE(SUM(Sales), 0) AS total_sales
             FROM Orders
+            WHERE 1=1
+        """
+
+        params = {}
+
+        if region:
+            query += " AND LOWER(Region) = LOWER(:region)"
+            params["region"] = region
+
+        if category:
+            query += " AND LOWER(Category) = LOWER(:category)"
+            params["category"] = category
+
+        if segment:
+            query += " AND LOWER(Segment) = LOWER(:segment)"
+            params["segment"] = segment
+
+        query += """
             GROUP BY Region
             ORDER BY total_sales DESC
-        """))
+        """
+
+        result = db.execute(text(query), params)
         rows = result.fetchall()
-        return [{"region": row[0], "total_sales": round(float(row[1]), 2)} for row in rows]
+
+        return [
+            {
+                "region": row[0],
+                "total_sales": round(float(row[1]), 2)
+            }
+            for row in rows
+        ]
+
     except Exception as e:
         print(f"❌ Error fetching sales by region: {e}")
         return []
 
 
-def get_sales_by_category(db: Session) -> list:
-    """Get total sales grouped by category."""
+def get_sales_by_category(
+    db: Session,
+    region: str | None = None,
+    category: str | None = None,
+    segment: str | None = None
+) -> list:
+    """Get total sales grouped by category with optional filters."""
+
     try:
-        result = db.execute(text("""
-            SELECT Category, COALESCE(SUM(Sales), 0) as total_sales
+        query = """
+            SELECT Category, COALESCE(SUM(Sales), 0) AS total_sales
             FROM Orders
+            WHERE 1=1
+        """
+
+        params = {}
+
+        if region:
+            query += " AND LOWER(Region) = LOWER(:region)"
+            params["region"] = region
+
+        if category:
+            query += " AND LOWER(Category) = LOWER(:category)"
+            params["category"] = category
+
+        if segment:
+            query += " AND LOWER(Segment) = LOWER(:segment)"
+            params["segment"] = segment
+
+        query += """
             GROUP BY Category
             ORDER BY total_sales DESC
-        """))
+        """
+
+        result = db.execute(text(query), params)
         rows = result.fetchall()
-        return [{"category": row[0], "total_sales": round(float(row[1]), 2)} for row in rows]
+
+        return [
+            {
+                "category": row[0],
+                "total_sales": round(float(row[1]), 2)
+            }
+            for row in rows
+        ]
+
     except Exception as e:
         print(f"❌ Error fetching sales by category: {e}")
         return []
@@ -152,3 +228,32 @@ def get_top_products(db: Session, limit: int = 10) -> list:
 def get_database_stats(db: Session) -> dict:
     """Legacy function - use get_dashboard_stats instead."""
     return get_dashboard_stats(db)
+
+def get_profit_by_year(db):
+    query = """
+        SELECT 
+            strftime('%Y', "Order.Date") AS year,
+            SUM("Profit") AS total_profit
+        FROM orders
+        GROUP BY strftime('%Y', "Order.Date")
+        ORDER BY year
+    """
+    result = db.execute(text(query)).fetchall()
+
+    return [
+        {
+            "year": row[0],
+            "total_profit": round(float(row[1] or 0), 2)
+        }
+        for row in result
+    ]
+
+
+def get_unique_customer_count(db):
+    query = """
+        SELECT COUNT(DISTINCT "Customer.ID")
+        FROM orders
+    """
+    result = db.execute(text(query)).scalar()
+
+    return int(result or 0)

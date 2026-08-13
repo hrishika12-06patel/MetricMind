@@ -18,14 +18,15 @@ export default function SalesPage() {
     async function fetchSalesData() {
       try {
         setLoading(true);
+        setError("");
 
         const [
           regionResponse,
           categoryResponse,
           yearResponse,
         ] = await Promise.all([
-          fetch("http://127.0.0.1:8000/sales/by-region"),
-          fetch("http://127.0.0.1:8000/sales/by-category"),
+          fetch("http://127.0.0.1:8000/reports/sales-by-region"),
+          fetch("http://127.0.0.1:8000/reports/sales-by-category"),
           fetch("http://127.0.0.1:8000/sales/by-year"),
         ]);
 
@@ -41,18 +42,25 @@ export default function SalesPage() {
         const categoryData = await categoryResponse.json();
         const yearData = await yearResponse.json();
 
+        console.log("Region API:", regionData);
+        console.log("Category API:", categoryData);
+        console.log("Year API:", yearData);
+
         setRegionSales(
-          regionData.data || regionData || []
+          Array.isArray(regionData) ? regionData : []
         );
 
         setCategorySales(
-          categoryData.data || categoryData || []
+          Array.isArray(categoryData) ? categoryData : []
         );
 
         setYearSales(
-          yearData.data || yearData || []
+          Array.isArray(yearData) ? yearData : []
         );
+
       } catch (err) {
+        console.error("Sales API error:", err);
+
         setError(
           "Unable to load sales data. Please check the backend."
         );
