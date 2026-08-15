@@ -39,9 +39,27 @@ export default function CategorySalesChart({
         setLoading(true);
         setError(false);
 
-        const response = await fetch(
-          "http://127.0.0.1:8000/sales/by-category"
-        );
+        const params = new URLSearchParams();
+
+        if (region) {
+          params.append("region", region);
+        }
+
+        if (category) {
+          params.append("category", category);
+        }
+
+        if (segment) {
+          params.append("segment", segment);
+        }
+
+        const queryString = params.toString();
+
+        const url = `http://127.0.0.1:8000/reports/sales-by-category${
+          queryString ? `?${queryString}` : ""
+        }`;
+
+        const response = await fetch(url);
 
         if (!response.ok) {
           throw new Error("Failed to fetch category sales");
@@ -49,16 +67,13 @@ export default function CategorySalesChart({
 
         const result = await response.json();
 
-        const chartData = Array.isArray(result.data)
-          ? result.data
+        const chartData: CategoryData[] = Array.isArray(result)
+          ? result
               .map((item: CategoryData) => ({
                 category: item.category,
                 total_sales: Number(item.total_sales) || 0,
               }))
-              .sort(
-                (a: CategoryData, b: CategoryData) =>
-                  b.total_sales - a.total_sales
-              )
+              .sort((a, b) => b.total_sales - a.total_sales)
           : [];
 
         setData(chartData);
@@ -71,7 +86,7 @@ export default function CategorySalesChart({
     }
 
     fetchCategorySales();
-  }, []);
+  }, [region, category, segment]);
 
   if (loading) {
     return (
@@ -150,11 +165,12 @@ export default function CategorySalesChart({
           maxBarSize={70}
         >
           {data.map((entry, index) => (
-           <Cell
-             key={`cell-${index}`}
-             fill={["#28468d", "#b91010", "#a78a08"][index % 3]}
-           />
+            <Cell
+              key={`cell-${index}`}
+              fill={["#28468d", "#b91010", "#a78a08"][index % 3]}
+            />
           ))}
+
           <LabelList
             dataKey="total_sales"
             position="top"

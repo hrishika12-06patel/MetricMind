@@ -180,7 +180,7 @@ export default function Dashboard() {
         className="dashboard-sidebar"
         style={{
           width: "150px",
-          background: "#1e293b",
+          background: "#4a2f42",
           color: "white",
           padding: "12px",
           flexShrink: 0,
@@ -191,6 +191,7 @@ export default function Dashboard() {
             marginBottom: "30px",
             fontSize: "24px",
             fontWeight: "bold",
+            
           }}
         >
           MetricMind
@@ -300,18 +301,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div
-            style={{
-              background: "white",
-              padding: "10px 16px",
-              borderRadius: "10px",
-              border: "1px solid #e5e7eb",
-              fontWeight: "500",
-              color: "#374151",
-            }}
-          >
-            Jul 21 – Jul 27, 2026
-          </div>
+          
         </div>
 
         {}
@@ -629,7 +619,11 @@ export default function Dashboard() {
               {isLoading ? (
                 <LoadingSkeleton />
               ) : hasData ? (
-                <RegionSalesChart region={region} />
+                <RegionSalesChart
+                 region={region}
+                 category={category}
+                 segment={segment}
+                />
               ) : (
                 <EmptyState />
               )}

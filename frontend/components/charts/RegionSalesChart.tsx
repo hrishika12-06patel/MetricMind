@@ -20,10 +20,14 @@ interface RegionData {
 
 interface RegionSalesChartProps {
   region?: string;
+  category?: string;
+  segment?: string;
 }
 
 export default function RegionSalesChart({
   region,
+  category,
+  segment,
 }: RegionSalesChartProps) {
   const [data, setData] = useState<RegionData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +39,18 @@ export default function RegionSalesChart({
         setLoading(true);
         setError(false);
 
+        const params = new URLSearchParams();
+
+        if (region) params.append("region", region);
+        if (category) params.append("category", category);
+        if (segment) params.append("segment", segment);
+
+        const queryString = params.toString();
+
         const response = await fetch(
-          "http://127.0.0.1:8000/sales/by-region"
+          `http://127.0.0.1:8000/reports/sales-by-region${
+            queryString ? `?${queryString}` : ""
+          }`
         );
 
         if (!response.ok) {
@@ -45,8 +59,8 @@ export default function RegionSalesChart({
 
         const result = await response.json();
 
-        const chartData = Array.isArray(result.data)
-          ? result.data
+        const chartData = Array.isArray(result)
+          ? result
               .map((item: RegionData) => ({
                 region: item.region,
                 total_sales: Number(item.total_sales) || 0,
@@ -61,13 +75,14 @@ export default function RegionSalesChart({
       } catch (err) {
         console.error("Region sales error:", err);
         setError(true);
+        setData([]);
       } finally {
         setLoading(false);
       }
     }
 
     fetchRegionSales();
-  }, []);
+  }, [region, category, segment]);
 
   if (loading) {
     return (
@@ -146,24 +161,27 @@ export default function RegionSalesChart({
         >
           {data.map((entry, index) => (
             <Cell
-             key={`cell-${index}`}
-             fill={[
-              "#ef8737",
-              "#efa852",
-              "#f57c0b81",
-              "#b17659",
-              "#f56740",
-              "#ba8c6b",
-              "#903e2c",
-              "#f06962",
-              "#f3244a",
-              "#f1bb0a",
-              "#8b2636",
-              "#7b4702",
-              "#3e0320",
-             ][index]}
-           />
-          ))}  
+              key={`cell-${index}`}
+              fill={
+                [
+                  "#ef8737",
+                  "#efa852",
+                  "#f57c0b81",
+                  "#b17659",
+                  "#f56740",
+                  "#ba8c6b",
+                  "#903e2c",
+                  "#f06962",
+                  "#f3244a",
+                  "#f1bb0a",
+                  "#8b2636",
+                  "#7b4702",
+                  "#3e0320",
+                ][index % 13]
+              }
+            />
+          ))}
+
           <LabelList
             dataKey="total_sales"
             position="top"
