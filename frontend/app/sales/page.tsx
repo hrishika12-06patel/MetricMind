@@ -47,15 +47,27 @@ export default function SalesPage() {
         console.log("Year API:", yearData);
 
         setRegionSales(
-          Array.isArray(regionData) ? regionData : []
+        Array.isArray(regionData)
+          ? regionData
+          : Array.isArray(regionData.data)
+            ? regionData.data
+            : []
         );
 
         setCategorySales(
-          Array.isArray(categoryData) ? categoryData : []
+          Array.isArray(categoryData)
+            ? categoryData
+            : Array.isArray(categoryData.data)
+              ? categoryData.data
+              : []
         );
 
         setYearSales(
-          Array.isArray(yearData) ? yearData : []
+          Array.isArray(yearData)
+            ? yearData
+            : Array.isArray(yearData.data)
+              ? yearData.data
+              : []
         );
 
       } catch (err) {

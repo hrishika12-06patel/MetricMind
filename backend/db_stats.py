@@ -158,16 +158,27 @@ def get_sales_by_category(
 
 
 def get_sales_by_year(db: Session) -> list:
-    """Get total sales grouped by year."""
+    """Get total sales grouped by order year."""
     try:
         result = db.execute(text("""
-            SELECT Year, COALESCE(SUM(Sales), 0) as total_sales
+            SELECT
+                strftime('%Y', "Order.Date") AS year,
+                COALESCE(SUM(Sales), 0) AS total_sales
             FROM Orders
-            GROUP BY Year
-            ORDER BY Year
+            GROUP BY strftime('%Y', "Order.Date")
+            ORDER BY year
         """))
+
         rows = result.fetchall()
-        return [{"year": row[0], "total_sales": round(float(row[1]), 2)} for row in rows]
+
+        return [
+            {
+                "year": row[0],
+                "total_sales": round(float(row[1] or 0), 2)
+            }
+            for row in rows
+        ]
+
     except Exception as e:
         print(f"❌ Error fetching sales by year: {e}")
         return []
